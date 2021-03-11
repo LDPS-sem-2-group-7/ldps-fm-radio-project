@@ -9,6 +9,8 @@ int g_volume = 0;
 int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
+g_volume = constrain(g_volume, 0, 18);
+
 
 // global constants
 const float c_minFreq = 96.4; // c_ corresponds to constant
@@ -17,6 +19,8 @@ const int c_rotaryEncoderDat 3;
 const int c_rotaryEncoderClk 2;
 const int c_memButton1Pin 8;
 const int c_memButton2Pin 9;
+const int frequButton1Pin //TODO
+const int frequButton2Pin //TODO
 
 
 void setup() {
@@ -59,6 +63,8 @@ void loop() {
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
     int memButton2State = digitalRead(c_memButton2Pin);
+    int frequButton1State = digitalRead(frequButton1Pin);
+    int frequButton2State = digitalRead(frequButton2Pin);
 
     // memory buttons
     if (memButton1State == HIGH) {
@@ -71,6 +77,17 @@ void loop() {
         frequencyUpdate(c_maxFreq);
     }
 
+    // frequency change buttons
+    if (frequButton1State== HIGH) {
+        Serial.print("Button press: frequButton1State")
+        frequencyUpdate(radio.seek('u'););
+    }
+
+    if (frequButton2State == HIGH) {
+        Serial.print("Button press: frequButton2State")
+        frequencyUpdate(radio.seek('d'););
+    }
+
     // rotary encoder
     g_reClkState = digitalRead(c_rotaryEncoderClk);
     g_reDatState = digitalRead(c_rotaryEncoderDat);
@@ -79,14 +96,10 @@ void loop() {
         // pulse occured
         if (g_reDatState != g_reClkState) {
             // clockwise
-            if (g_volume < 18) {
-                g_volume++;
-            }
+            g_volume++;
         } else {
             // anticlockwise
-            if (g_volume > 0) {
-                g_volume--;
-            }
+            g_volume--;
         }
     }
     g_reLastState = g_reClkState;
