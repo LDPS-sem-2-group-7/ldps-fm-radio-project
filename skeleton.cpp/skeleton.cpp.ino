@@ -1,6 +1,8 @@
 #include "ar1010lib.h"
 #include "LiquidCrystal_I2C.h"
 #include <Wire.h>
+#include <string>
+
 
 // global constants, c_ corresponds to constant
 const int c_i2cDataPath 0x27;
@@ -26,6 +28,12 @@ int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
 int g_volume = 0;
+int g_day = 0;
+int g_month = 0;
+int g_year = 0;
+int g_hour = 0;
+int g_minute = 0;
+//int g_second = 0; removed for clarity and efficiency
 g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
 
 void setup() {
@@ -121,22 +129,40 @@ void loop() {
             // clockwise
             Serial.print("Clockwise turn")
             g_volume++;
-            printVolume();
+            displayVolume();
         } else {
             // anticlockwise
             Serial.print("Anticlockwise turn")
             g_volume--;
-            printVolume();
+            displayVolume();
         }
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 }
 
-void printVolume(void) {
+void displayVolume() {
     g_lcd.clear();
     g_lcd.setCursor(3, 1);
     g_lcd.print(g_volume);
+}
+
+void printTime(float frequency) {
+    /*
+      |2020-13-45 15:00| >>> | 23 °
+      |█████████       |
+    OR
+      |97.8HZ - EAGLE R| >>> | ADIO
+    */
+    string date = to_string(g_year)+'/'+to_string(g_month)+'/'+to_string(g_day);
+    string time = to_string(g_hour)+':'+to_string(g_minute);
+    string dateTime = date + time;
+    g_lcd.clear();
+    g_lcd.setCursor(3, 0);
+    g_lcd.print(dateTime)
+    g_lcd.rightToLeft();
+    g_lcd.setCursor(3,1);
+    g_lcd.print(frequency)
 }
 
 void frequencyUpdate(float frequency) {
