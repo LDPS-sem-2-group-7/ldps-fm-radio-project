@@ -2,18 +2,8 @@
 #include "LiquidCrystal_I2C.h"
 #include <Wire.h>
 
-// creating the radio and LCD objects, g_ corresponds to global
-AR1010 g_radio = AR1010();
-LiquidCrystal_I2C g_lcd(0x27, 16, 2);
-int g_reClkState = 0;
-int g_reDatState = 0;
-int g_reLastState = 0;
-int g_volume = 0;
-g_volume = constrain(g_volume, 0, 18);
-
-
-// global constants
-const float c_minFreq = 96.4; // c_ corresponds to constant
+// global constants, c_ corresponds to constant
+const float c_minFreq = 96.4;
 const float c_maxFreq = 107.9;
 const float c_memFreq1 = 100.0; // TODO fix
 const float c_memFreq2 = 101.0;
@@ -21,9 +11,21 @@ const int c_rotaryEncoderDat 3;
 const int c_rotaryEncoderClk 2;
 const int c_memButton1Pin 8;
 const int c_memButton2Pin 9;
-const int frequButton1Pin 6
-const int frequButton2Pin 7
+const int c_frequButton1Pin 6;
+const int c_frequButton2Pin 7;
+const int c_lcdDataPath 0x27; // TODO what is this acctually
+const int c_lcdLen 16;
+const int c_lcdHeight 2;
+const int c_maxVolume 18;
 
+// creating the radio and LCD objects, g_ corresponds to global
+AR1010 g_radio = AR1010();
+LiquidCrystal_I2C g_lcd(c_lcdDataPath, c_lcdHeight, c_lcdLen);
+int g_reClkState = 0;
+int g_reDatState = 0;
+int g_reLastState = 0;
+int g_volume = 0;
+g_volume = constrain(g_volume, 0, c_maxVolume);
 
 void setup() {
     // initialise the objects
@@ -64,8 +66,8 @@ void loop() {
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
     int memButton2State = digitalRead(c_memButton2Pin);
-    int frequButton1State = digitalRead(frequButton1Pin);
-    int frequButton2State = digitalRead(frequButton2Pin);
+    int frequButton1State = digitalRead(c_frequButton1Pin);
+    int frequButton2State = digitalRead(c_frequButton2Pin);
 
     // memory buttons
     if (memButton1State == HIGH) {
