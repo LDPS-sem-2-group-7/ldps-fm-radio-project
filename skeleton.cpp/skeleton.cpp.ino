@@ -5,23 +5,23 @@
 
 
 // global constants, c_ corresponds to constant
-const int c_i2cDataPath 0x27;
+const int c_i2cDataPath = 0x27;
 const float c_minFreq = 96.4;
 const float c_maxFreq = 107.9;
 const float c_memFreq1 = 100.0; // TODO fix
 const float c_memFreq2 = 101.0;
-const int c_rotaryEncoderDat 3;
-const int c_rotaryEncoderClk 2;
-const int c_memButton1Pin 8;//TODO:header file for the constants
-const int c_memButton2Pin 9;
-const int c_frequButton1Pin 6;
-const int c_frequButton2Pin 7;
-const int c_rtcPinSDA TODO;///////////
-const int c_rtcPinSCL TODO;
-const int c_lcdLen 16;
-const int c_lcdHeight 2;
-const int c_minVolume 0;
-const int c_maxVolume 18;
+const int c_reDat = 3;
+const int c_reClk = 2;
+const int c_memButton1Pin = 8;//TODO:header file for the constants
+const int c_memButton2Pin = 9;
+const int c_frequButton1Pin = 6;
+const int c_frequButton2Pin = 7;
+const int c_rtcPinSDA = TODO;///////////
+const int c_rtcPinSCL = TODO;
+const int c_lcdLen = 16;
+const int c_lcdHeight = 2;
+const int c_minVolume = 0;
+const int c_maxVolume = 18;
 
 // global variables, g_ corresponds to global
 int g_reClkState = 0;
@@ -38,7 +38,7 @@ g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
 
 void setup() {
     // initialise the objects
-    Serial.print("Being initialisation")
+    Serial.print("Begin initialisation")
     Wire.begin(); // basic arduino library to read connections
     delay(1000);
 
@@ -62,10 +62,10 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder")
-    pinMode(c_rotaryEncoderDat, INPUT);
-    pinMode(c_rotaryEncoderClk, INPUT);
+    pinMode(c_reDat, INPUT);
+    pinMode(c_reClk, INPUT);
     Serial.begin(9600); // set baud rate
-    lastState = digitalRead(c_rotaryEncoderClk);
+    lastState = digitalRead(c_reClk);
 
     // print the welcome message
     Serial.print("Print welcome message") // TODO: we can do a real message
@@ -86,7 +86,7 @@ void loop() {
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
 
-
+    printTime(frequency);
 
     // memory buttons
     if (memButton1State == HIGH) {
@@ -119,8 +119,8 @@ void loop() {
     }
 
     // rotary encoder
-    g_reClkState = digitalRead(c_rotaryEncoderClk);
-    g_reDatState = digitalRead(c_rotaryEncoderDat);
+    g_reClkState = digitalRead(c_reClk);
+    g_reDatState = digitalRead(c_reDat);
 
     if (g_reClkState != g_reLastState) {
         Serial.print("RE pulse")
@@ -154,7 +154,7 @@ void printTime(float frequency) {
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
-    string date = to_string(g_year)+'/'+to_string(g_month)+'/'+to_string(g_day);
+    string date = to_string(g_year)+'-'+to_string(g_month)+'-'+to_string(g_day);
     string time = to_string(g_hour)+':'+to_string(g_minute);
     string dateTime = date + time;
     g_lcd.clear();
