@@ -34,6 +34,7 @@ int g_month = 0;
 int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
+float g_muteState = false;
 //int g_second = 0; removed for clarity and efficiency
 g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
 
@@ -41,14 +42,14 @@ void setup() {
     // initialise the objects
     Serial.print("Being initialisation")
     Wire.begin(); // basic arduino library to read connections
-    delay(1000);
+    delay(500);
 
     // set the frequency
     Serial.print("Initialise radio object")
     AR1010 g_radio = AR1010();
     radio.initialise();
     radio.setFrequency(c_minFreq);
-    delay(1000);
+    delay(500);
 
     // intialise the lcd
     Serial.print("Initialise lcd object")
@@ -74,12 +75,12 @@ void setup() {
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
     g_lcd.print(c_minFreq);
-    delay(1000);
+    delay(500);
 }
 
 void loop() {
     // set variables
-    float current_frequency;
+    float current_frequency = c_minFreq;
 
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
@@ -87,48 +88,20 @@ void loop() {
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
 
-
-
-    // memory buttons
-    if (memButton1State == HIGH) {
-        Serial.print("Button press: memButton1")
-        frequencyUpdate(c_memFreq1);
-    }
-
-    if (memButton2State == HIGH) {
-        Serial.print("Button press: memButton2")
-        frequencyUpdate(c_memFreq2);
-    }
-
-    // frequency change buttons
-    if (frequButton1State == HIGH) {
-        Serial.print("Button press: frequButton1State")
-        current_frequency = radio.seek('u');
-        if (current_frequency > c_maxFreq) {
-            current_frequency = c_minFreq;
-        }
-        frequencyUpdate(current_frequency);
-    }
-
-    if (frequButton2State == HIGH) {
-        Serial.print("Button press: frequButton2State")
-        current_frequency = radio.seek('d');
-        if (current_frequency > c_minFreq) {
-            current_frequency = c_maxFreq;
-        }
-        frequencyUpdate(current_frequency);
-    }
+    delay(500);
+    printTime(frequency);
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
     g_reDatState = digitalRead(c_reDat);
 
     // mute swtich
-    if (c_reSw == HIGH){//if re is pressed down then mute, otherwise
-      radio.setHardmute(true);
-    } else{
-      radio.setHardmute(false);
+    if (c_reSw == HIGH) {
+        g_muteState = true;
+    } else {
+        g_muteState = false;
     }
+    radio.setHardmute(g_muteState);
 
     // volume control
     if (g_reClkState != g_reLastState) {
@@ -148,30 +121,77 @@ void loop() {
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
+
+    // memory buttons
+    if (memButton1State == HIGH) {
+        Serial.print("Button press: memButton1")
+        frequencyUpdate(c_memFreq1);
+        continue;
+    }
+
+    if (memButton2State == HIGH) {
+        Serial.print("Button press: memButton2")
+        frequencyUpdate(c_memFreq2);
+        continue;
+    }
+
+    // frequency change buttons
+    if (frequButton1State == HIGH) {
+        Serial.print("Button press: frequButton1State")
+        current_frequency = radio.seek('u');
+        if (current_frequency > c_maxFreq) {
+            current_frequency = c_minFreq;
+        }
+        frequencyUpdate(current_frequency);
+        continue;
+    }
+
+    if (frequButton2State == HIGH) {
+        Serial.print("Button press: frequButton2State")
+        current_frequency = radio.seek('d');
+        if (current_frequency > c_minFreq) {
+            current_frequency = c_maxFreq;
+        }
+        frequencyUpdate(current_frequency);
+        continue;
+    }
 }
 
 void displayVolume() {
+    string out_string;
+    int count = g_volume * (16 / 18);
+
+    out_string = string(count, "█") + string(16 - count, " ");
+
+    if (g_muteState) {
+        out_string = "MUTED";
+    }
+
     g_lcd.clear();
     g_lcd.setCursor(3, 1);
-    g_lcd.print(g_volume);
+    g_lcd.print(out_string);
 }
 
-void printTime(float frequency) {
+void printTime(float frequency) {//default LCD output.
     /*
       |2020-13-45 15:00| >>> | 23 °
       |█████████       |
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
-    string date = to_string(g_year)+'/'+to_string(g_month)+'/'+to_string(g_day);
-    string time = to_string(g_hour)+':'+to_string(g_minute);
-    string dateTime = date + time;
+    string date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
+    string time = to_string(g_hour) + ':' + to_string(g_minute);
+    string temp = to_string(rtc.getTemp()) + 'C';
+    string dateTimeTemp = date + time + temp;
     g_lcd.clear();
     g_lcd.setCursor(3, 0);
-    g_lcd.print(dateTime)
+    g_lcd.print(dateTime);
     g_lcd.rightToLeft();
-    g_lcd.setCursor(3,1);
-    g_lcd.print(frequency)
+    g_lcd.setCursor(3, 1);
+    g_lcd.print(frequency);//TODO: add station name;
+}
+
+string station_name(float frequency) {
 }
 
 void frequencyUpdate(float frequency) {
