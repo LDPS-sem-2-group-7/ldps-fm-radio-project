@@ -5,22 +5,24 @@
 // creating the radio and LCD objects, g_ corresponds to global
 AR1010 g_radio = AR1010();
 LiquidCrystal_I2C g_lcd(0x27, 16, 2);
-int g_volume = 0;
 int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
+int g_volume = 0;
 g_volume = constrain(g_volume, 0, 18);
 
 
 // global constants
 const float c_minFreq = 96.4; // c_ corresponds to constant
 const float c_maxFreq = 107.9;
+const float c_memFreq1 = 100.0; // TODO fix
+const float c_memFreq2 = 101.0;
 const int c_rotaryEncoderDat 3;
 const int c_rotaryEncoderClk 2;
 const int c_memButton1Pin 8;
 const int c_memButton2Pin 9;
-const int frequButton1Pin //TODO
-const int frequButton2Pin //TODO
+const int frequButton1Pin 6
+const int frequButton2Pin 7
 
 
 void setup() {
@@ -56,9 +58,8 @@ void setup() {
 }
 
 void loop() {
-    // set frequency constraints
+    // set variables
     float current_frequency;
-    current_frequency = constrain(current_frequency, c_minFreq, c_maxFreq);
 
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
@@ -69,23 +70,31 @@ void loop() {
     // memory buttons
     if (memButton1State == HIGH) {
         Serial.print("Button press: memButton1")
-        frequencyUpdate(c_minFreq);
+        frequencyUpdate(c_memFreq1);
     }
 
     if (memButton2State == HIGH) {
         Serial.print("Button press: memButton2")
-        frequencyUpdate(c_maxFreq);
+        frequencyUpdate(c_memFreq2);
     }
 
     // frequency change buttons
-    if (frequButton1State== HIGH) {
+    if (frequButton1State == HIGH) {
         Serial.print("Button press: frequButton1State")
-        frequencyUpdate(radio.seek('u'););
+        current_frequency = radio.seek('u');
+        if (current_frequency > c_maxFreq) {
+            current_frequency = c_minFreq;
+        }
+        frequencyUpdate(current_frequency);
     }
 
     if (frequButton2State == HIGH) {
         Serial.print("Button press: frequButton2State")
-        frequencyUpdate(radio.seek('d'););
+        current_frequency = radio.seek('d');
+        if (current_frequency > c_minFreq) {
+            current_frequency = c_maxFreq;
+        }
+        frequencyUpdate(current_frequency);
     }
 
     // rotary encoder
@@ -110,6 +119,7 @@ void frequencyUpdate(float frequency) {
     // set the frequency
     g_radio.setFrequency(frequency);
     // print to the LCD
-    g_lcd.setCursor(3, 1);
+    g_lcd.clear();
+    g_lcd.setCursor(3, 1); // TODO: test in labs
     g_lcd.print(frequency);
 }
