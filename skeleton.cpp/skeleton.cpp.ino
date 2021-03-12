@@ -12,7 +12,7 @@ const float c_memFreq1 = 100.0; // TODO fix
 const float c_memFreq2 = 101.0;
 const int c_reDat = 3;
 const int c_reClk = 2;
-const int c_reSw = 4;
+const int c_reSwState = 4;
 const int c_memButton1Pin 8;//TODO:header file for the constants
 const int c_memButton2Pin 9;
 const int c_frequButton1Pin 6;
@@ -64,9 +64,9 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder")
-    pinMode(c_rotaryEncoderDat, INPUT_PULLUP); // input pullup used in sims
-    pinMode(c_rotaryEncoderClk, INPUT_PULLUP);
-    pinMode(c_ro)
+    pinMode(c_reDat, INPUT_PULLUP); // input pullup used in sims
+    pinMode(c_reClk, INPUT_PULLUP);
+    pinMode(c_reSw, INPUT_PULLUP);
     Serial.begin(9600); // set baud rate
     lastState = digitalRead(c_rotaryEncoderClk);
 
@@ -95,9 +95,10 @@ void loop() {
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
     g_reDatState = digitalRead(c_reDat);
+    g_reSwState = digitalRead(c_reSw);
 
-    // mute swtich
-    if (c_reSw == HIGH) {
+    // mute switch
+    if (c_reSwState == HIGH) {
         g_muteState = true;
     } else {
         g_muteState = false;
@@ -160,14 +161,17 @@ void loop() {
 
 void displayVolume() {
     string out_string;
-    int count = g_volume * (16 / 18);
+    int count = g_volume * (16 / 18); // sets number of bars to complete
 
+    // create the string
     out_string = string(count, "█") + string(16 - count, " ");
 
+    // check if muted
     if (g_muteState) {
         out_string = "MUTED";
     }
 
+    // print to the lcd
     g_lcd.clear();
     g_lcd.setCursor(3, 1);
     g_lcd.print(out_string);
@@ -193,6 +197,7 @@ void printTime(float frequency) {//default LCD output.
 }
 
 string station_name(float frequency) {
+
 }
 
 void frequencyUpdate(float frequency) {
