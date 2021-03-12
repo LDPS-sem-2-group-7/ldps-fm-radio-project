@@ -10,7 +10,7 @@ const float c_memFreq1 = 100.0; // TODO fix
 const float c_memFreq2 = 101.0;
 const int c_rotaryEncoderDat 3;
 const int c_rotaryEncoderClk 2;
-const int c_memButton1Pin 8;
+const int c_memButton1Pin 8;//TODO:header file for the constants
 const int c_memButton2Pin 9;
 const int c_frequButton1Pin 6;
 const int c_frequButton2Pin 7;
@@ -49,6 +49,7 @@ void setup() {
     g_lcd.clear();
 
     // intialise the rtc
+    Serial.print("Initialise rtc")
     DS3231 g_rtc(c_rtcPinSDA, c_rtcPinSCL);
 
     // initialise the rotary encoder
@@ -76,6 +77,8 @@ void loop() {
     int memButton2State = digitalRead(c_memButton2Pin);
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
+
+
 
     // memory buttons
     if (memButton1State == HIGH) {
@@ -112,17 +115,28 @@ void loop() {
     g_reDatState = digitalRead(c_rotaryEncoderDat);
 
     if (g_reClkState != g_reLastState) {
+        Serial.print("RE pulse")
         // pulse occured
         if (g_reDatState != g_reClkState) {
             // clockwise
+            Serial.print("Clockwise turn")
             g_volume++;
+            printVolume();
         } else {
             // anticlockwise
+            Serial.print("Anticlockwise turn")
             g_volume--;
+            printVolume();
         }
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
+}
+
+void printVolume(void) {
+    g_lcd.clear();
+    g_lcd.setCursor(3, 1);
+    g_lcd.print(g_volume);
 }
 
 void frequencyUpdate(float frequency) {
