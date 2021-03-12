@@ -64,8 +64,9 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder")
-    pinMode(c_rotaryEncoderDat, INPUT);
-    pinMode(c_rotaryEncoderClk, INPUT);
+    pinMode(c_rotaryEncoderDat, INPUT_PULLUP); // input pullup used in sims
+    pinMode(c_rotaryEncoderClk, INPUT_PULLUP);
+    pinMode(c_ro)
     Serial.begin(9600); // set baud rate
     lastState = digitalRead(c_rotaryEncoderClk);
 
@@ -123,20 +124,20 @@ void loop() {
     g_radio.setVolume(g_volume);
 
     // memory buttons
-    if (memButton1State == HIGH) {
+    if (memButton1State == LOW) {
         Serial.print("Button press: memButton1")
         frequencyUpdate(c_memFreq1);
         continue;
     }
 
-    if (memButton2State == HIGH) {
+    if (memButton2State == LOW) {
         Serial.print("Button press: memButton2")
         frequencyUpdate(c_memFreq2);
         continue;
     }
 
     // frequency change buttons
-    if (frequButton1State == HIGH) {
+    if (frequButton1State == LOW) {
         Serial.print("Button press: frequButton1State")
         current_frequency = radio.seek('u');
         if (current_frequency > c_maxFreq) {
@@ -146,7 +147,7 @@ void loop() {
         continue;
     }
 
-    if (frequButton2State == HIGH) {
+    if (frequButton2State == LOW) {
         Serial.print("Button press: frequButton2State")
         current_frequency = radio.seek('d');
         if (current_frequency > c_minFreq) {
