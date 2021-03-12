@@ -3,6 +3,7 @@
 #include <Wire.h>
 
 // global constants, c_ corresponds to constant
+const int c_i2cDataPath 0x27;
 const float c_minFreq = 96.4;
 const float c_maxFreq = 107.9;
 const float c_memFreq1 = 100.0; // TODO fix
@@ -13,37 +14,42 @@ const int c_memButton1Pin 8;
 const int c_memButton2Pin 9;
 const int c_frequButton1Pin 6;
 const int c_frequButton2Pin 7;
-const int c_lcdDataPath 0x27; // TODO what is this acctually
+const int c_rtcPinSDA TODO;///////////
+const int c_rtcPinSCL TODO;
 const int c_lcdLen 16;
 const int c_lcdHeight 2;
 const int c_minVolume 0;
 const int c_maxVolume 18;
 
-// creating the radio and LCD objects, g_ corresponds to global
-AR1010 g_radio = AR1010();
-LiquidCrystal_I2C g_lcd(c_lcdDataPath, c_lcdHeight, c_lcdLen);
+// global variables, g_ corresponds to global
 int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
 int g_volume = 0;
-g_volume = constrain(g_volume,c_minVolume, c_maxVolume);
+g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
 
 void setup() {
     // initialise the objects
     Serial.print("Being initialisation")
     Wire.begin(); // basic arduino library to read connections
     delay(1000);
+
     // set the frequency
     Serial.print("Initialise radio object")
+    AR1010 g_radio = AR1010();
     radio.initialise();
     radio.setFrequency(c_minFreq);
     delay(1000);
 
     // intialise the lcd
     Serial.print("Initialise lcd object")
+    LiquidCrystal_I2C g_lcd(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.begin();
     g_lcd.backlight();
     g_lcd.clear();
+
+    // intialise the rtc
+    DS3231 g_rtc(c_rtcPinSDA, c_rtcPinSCL);
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder")
@@ -52,6 +58,7 @@ void setup() {
     Serial.begin(9600); // set baud rate
     lastState = digitalRead(c_rotaryEncoderClk);
 
+    // print the welcome message
     Serial.print("Print welcome message") // TODO: we can do a real message
     g_lcd.setCursor(3, 0);
     g_lcd.print("EAGLE RADIO");
