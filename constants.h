@@ -13,8 +13,8 @@ const int c_memButton1Pin 8;//TODO:header file for the constants
 const int c_memButton2Pin 9;
 const int c_frequButton1Pin 6;
 const int c_frequButton2Pin 7;
-const int c_rtcPinSDA TODO;///////////
-const int c_rtcPinSCL TODO;
+const int c_rtcPinSDA 27; // this is just the i2c rail
+const int c_rtcPinSCL 28;
 const int c_lcdLen 16;
 const int c_lcdHeight 2;
 const int c_minVolume 0;
