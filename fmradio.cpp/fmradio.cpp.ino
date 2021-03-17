@@ -5,7 +5,6 @@
 #include "constants.h"
 
 // constants moved to constants.h
-
 // global variables, g_ corresponds to global
 int g_reClkState = 0;
 int g_reDatState = 0;
