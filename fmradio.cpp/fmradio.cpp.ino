@@ -57,6 +57,11 @@ void setup() {
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
     g_lcd.print(c_minFreq);
+
+    if(! g_rtc.isrunning()){
+      Serial.println("RTC is not running !");
+      rtc.adjust(DateTime(03 26 2021,10:30:00));
+    }
     delay(500);
 }
 
@@ -69,6 +74,9 @@ void loop() {
     int memButton2State = digitalRead(c_memButton2Pin);
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
+    int timeUpButtonState = digitalRead(c_timeUp);
+    int timeDownButtonState = digitalRead(c_timeDown);
+
 
     delay(500);
     printTime(frequency);
@@ -138,6 +146,31 @@ void loop() {
         frequencyUpdate(current_frequency);
         continue;
     }
+  if(timeUpButtonState == LOW){
+    Serial.print("Button press: timeUpButtonState")
+    if(g_hour == 23){
+      g_hour == 0;
+    }
+    if(g_minute ==59){
+      g_minute == 0
+      g_hour++;
+    }else{
+      g_minute++;
+    }
+  }
+  if(timeDownButtonState == LOW){
+    Serial.print("Button press: timeDownButtonState")
+    Serial.print("Button press: timeUpButtonState")
+    if(g_hour == 0){
+      g_hour == 23;
+    }
+    if(g_minute ==0){
+      g_minute == 59
+      g_hour--;
+    }else{
+      g_minute--;
+    }
+  }
 }
 
 void displayVolume() {
@@ -165,9 +198,12 @@ void printTime(float frequency) {//default LCD output.
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
+    DateTime now = rtc.now();
+    g_year = now.year();g_month = now.month(); g_day = now.day();
+    g_hour = now.hour();g_minute = now.minute();
     string date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
     string time = to_string(g_hour) + ':' + to_string(g_minute);
-    string temp = to_string(rtc.getTemp()) + 'C';
+    string temp = to_string(g_rtc.getTemp()) + 'C';
     string dateTimeTemp = date + time + temp;
     g_lcd.clear();
     g_lcd.setCursor(3, 0);
