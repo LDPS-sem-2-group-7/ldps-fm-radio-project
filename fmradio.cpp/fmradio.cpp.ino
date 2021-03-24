@@ -161,8 +161,17 @@ void loop() {
     }else{
       g_minute++;
     }
+    now.month() = g_month;
+    now.day() = g_day;
+    now.year() = g_day;
+    now.hour() = g_hour;
+    now.minute()  = g_minute;
+    now.second() = g_second;
+    rtc.now() = now;
+    continue;
   }
   if(timeDownButtonState == LOW){
+    DateTime now;
     Serial.print("Button press: timeUpButtonState")
     if(g_hour == 0){
       g_hour == 23;
@@ -173,6 +182,14 @@ void loop() {
     }else{
       g_minute--;
     }
+    now.month() = g_month;
+    now.day() = g_day;
+    now.year() = g_day;
+    now.hour() = g_hour;
+    now.minute()  = g_minute;
+    now.second() = g_second;
+    rtc.now() = now;
+    continue;
   }
 }
 
@@ -217,6 +234,8 @@ void printTime(float frequency) {//default LCD output.
 string station_name(float frequency) {
 
 }
+
+
 
 void frequencyUpdate(float frequency) {
     // set the frequency
