@@ -58,14 +58,14 @@ void setup() {
     g_lcd.setCursor(3, 1);
     g_lcd.print(c_minFreq);
 
-    if(! g_rtc.isrunning()){
-      Serial.println("RTC is not running !");
-      rtc.adjust(DateTime(03 26 2021,10:30:00));
+    if (!g_rtc.isrunning()) {
+        Serial.println("RTC is not running !");
+        rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
     }
     //set the time to the globals.
     DateTime now = rtc.now();
-    g_year = now.year();g_month = now.month(); g_day = now.day();
-    g_hour = now.hour();g_minute = now.minute();
+    g_year = now.year(); g_month = now.month(); g_day = now.day();
+    g_hour = now.hour(); g_minute = now.minute();
     delay(500);
 }
 
@@ -83,7 +83,7 @@ void loop() {
 
 
     delay(500);
-    print_display(frequency);
+    printDisplay(frequency);
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
@@ -150,47 +150,47 @@ void loop() {
         frequencyUpdate(current_frequency);
         continue;
     }
-  if(timeUpButtonState == LOW){
-    Serial.print("Button press: timeUpButtonState")
-    if(g_hour == 23){
-      g_hour == 0;
+    if (timeUpButtonState == LOW) {
+        Serial.print("Button press: timeUpButtonState")
+        if (g_hour == 23) {
+            g_hour == 0;
+        }
+        if (g_minute == 59) {
+            g_minute == 0
+            g_hour++;
+        } else {
+            g_minute++;
+        }
+        now.month() = g_month;
+        now.day() = g_day;
+        now.year() = g_day;
+        now.hour() = g_hour;
+        now.minute() = g_minute;
+        now.second() = g_second;
+        rtc.now() = now;
+        continue;
     }
-    if(g_minute ==59){
-      g_minute == 0
-      g_hour++;
-    }else{
-      g_minute++;
+    if (timeDownButtonState == LOW) {
+        DateTime now;
+        Serial.print("Button press: timeUpButtonState")
+        if (g_hour == 0) {
+            g_hour == 23;
+        }
+        if (g_minute == 0) {
+            g_minute == 59
+            g_hour--;
+        } else {
+            g_minute--;
+        }
+        now.month() = g_month;
+        now.day() = g_day;
+        now.year() = g_day;
+        now.hour() = g_hour;
+        now.minute() = g_minute;
+        now.second() = g_second;
+        rtc.now() = now;
+        continue;
     }
-    now.month() = g_month;
-    now.day() = g_day;
-    now.year() = g_day;
-    now.hour() = g_hour;
-    now.minute()  = g_minute;
-    now.second() = g_second;
-    rtc.now() = now;
-    continue;
-  }
-  if(timeDownButtonState == LOW){
-    DateTime now;
-    Serial.print("Button press: timeUpButtonState")
-    if(g_hour == 0){
-      g_hour == 23;
-    }
-    if(g_minute ==0){
-      g_minute == 59
-      g_hour--;
-    }else{
-      g_minute--;
-    }
-    now.month() = g_month;
-    now.day() = g_day;
-    now.year() = g_day;
-    now.hour() = g_hour;
-    now.minute()  = g_minute;
-    now.second() = g_second;
-    rtc.now() = now;
-    continue;
-  }
 }
 
 void displayVolume() {
@@ -211,7 +211,7 @@ void displayVolume() {
     g_lcd.print(out_string);
 }
 
-void print_display(float frequency) {//default LCD output.
+void printDisplay(float frequency) {//default LCD output.
     /*
       |2020-13-45 15:00| >>> | 23 °
       |█████████       |
@@ -231,39 +231,37 @@ void print_display(float frequency) {//default LCD output.
     g_lcd.print(frequency);
 
     // TODO: this overwrites the time, do we want to add a delay?
-    string name = station_name(frequency);
+    string name = stationName(frequency);
     g_lcd.setCursor(3, 0);
     g_lcd.print(name);
 }
 
-string station_name(float freq) {
+string stationName(float freq) {
     // get the station names
-    string station_name = "";
+    string stationName = "";
 
     if (freq == 105.8) {
-        station_name = "Absolute Radio";
+        stationName = "Absolute Radio";
     } else if (97.1 <= freq && freq <= 99.7) {
-        station_name = "BBC Radio 1";
+        stationName = "BBC Radio 1";
     } else if (88.1 <= freq && freq <= 90.2) {
-        station_name = "BBC Radio 2";
+        stationName = "BBC Radio 2";
     } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
-        station_name = "BBC Radio 3";
+        stationName = "BBC Radio 3";
     } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
-        station_name = "BBC Radio 4";
+        stationName = "BBC Radio 4";
     } else if (99.9 <= freq && freq <= 101.9) {
-        station_name = "Classic FM";
+        stationName = "Classic FM";
     } else if (freq == 100.0) {
-        station_name = "Kiss";
+        stationName = "Kiss";
     } else if (freq == 97.3) {
-        station_name = "LBC";
+        stationName = "LBC";
     } else if (freq == 105.4) {
-        station_name = "Magic";
+        stationName = "Magic";
     }
 
-    return station_name;
+    return stationName;
 }
-
-
 
 void frequencyUpdate(float frequency) {
     // set the frequency
