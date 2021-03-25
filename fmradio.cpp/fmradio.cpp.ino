@@ -134,7 +134,7 @@ void loop() {
     if (frequButton1State == LOW) {
         Serial.print("Button press: frequButton1State");
         current_frequency = radio.seek('u');
-        if (current_frequency > c_maxFreq); {
+        if (current_frequency > c_maxFreq) {
             current_frequency = c_minFreq;
         }
         frequencyUpdate(current_frequency);
@@ -144,7 +144,7 @@ void loop() {
     if (frequButton2State == LOW) {
         Serial.print("Button press: frequButton2State");
         current_frequency = radio.seek('d');
-        if (current_frequency > c_minFreq); {
+        if (current_frequency > c_minFreq) {
             current_frequency = c_maxFreq;
         }
         frequencyUpdate(current_frequency);
