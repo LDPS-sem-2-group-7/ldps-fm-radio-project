@@ -78,8 +78,8 @@ void loop() {
     int memButton2State = digitalRead(c_memButton2Pin);
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
-    int timeUpButtonState = digitalRead(c_timeUp);
-    int timeDownButtonState = digitalRead(c_timeDown);
+    int g_timeHourButtonState = digitalRead(c_timeHour);
+    int g_timeMinButtonState = digitalRead(c_timeMin);
 
 
     delay(500);
@@ -151,18 +151,15 @@ void loop() {
         continue;
     }
 
-    if (timeUpButtonState == LOW) {
+    if (g_timeHourButtonState == LOW) {
         DateTime now; // temp object, copied to global object
-        Serial.print("Button press: timeUpButtonState");
-        if (g_hour == 23 && g_minute == 59) {
-            g_hour == 0;
+        Serial.print("Button press: g_timeHourButtonState");
+
+        g_hour++;
+        if (g_hour == 24) {
+            g_hour = 0;
         }
-        if (g_minute == 59) {
-            g_minute == 0;
-            g_hour++;
-        } else {
-            g_minute++;
-        }
+
         now.month() = g_month;
         now.day() = g_day;
         now.year() = g_day;
@@ -173,18 +170,15 @@ void loop() {
         continue;
     }
 
-    if (timeDownButtonState == LOW) {
+    if (g_timeMinButtonState == LOW) {
         DateTime now;
-        Serial.print("Button press: timeUpButtonState")
-        if (g_hour == 0) {
-            g_hour == 23;
+        Serial.print("Button press: g_timeMinButtonState")
+
+        g_minute++;
+        if (g_minute == 60) {
+            g_minute = 0;
         }
-        if (g_minute == 0) {
-            g_minute == 59;
-            g_hour--;
-        } else {
-            g_minute--;
-        }
+
         now.month() = g_month;
         now.day() = g_day;
         now.year() = g_day;

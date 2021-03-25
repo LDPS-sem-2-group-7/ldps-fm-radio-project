@@ -13,9 +13,8 @@ const int c_memButton1Pin = 5;
 const int c_memButton2Pin = 6;
 const int c_frequButton1Pin = 9;
 const int c_frequButton2Pin = 10;
-const int c_timeUp; //TODO some number;
-const int c_timeDown; //TODO some number;
-// TODO: Use pin buttons D7 and D8 to adjust RTC module
+const int c_timeHour = 11;
+const int c_timeMin = 12;
 const int c_rtcPinSDA = 27; // this is just the i2c rail
 const int c_rtcPinSCL = 28;
 const int c_lcdLen = 16;
