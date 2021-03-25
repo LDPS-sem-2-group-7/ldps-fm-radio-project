@@ -60,10 +60,10 @@ void setup() {
 
     if (!g_rtc.isrunning()) {
         Serial.println("RTC is not running !");
-        rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
+        g_rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
     }
     //set the time to the globals.
-    DateTime now = rtc.now();
+    DateTime now = g_rtc.now();
     g_year = now.year(); g_month = now.month(); g_day = now.day();
     g_hour = now.hour(); g_minute = now.minute();
     delay(500);
@@ -151,6 +151,7 @@ void loop() {
         continue;
     }
     if (timeUpButtonState == LOW) {
+        DateTime now; // temp object, copied to global object
         Serial.print("Button press: timeUpButtonState");
         if (g_hour == 23) {
             g_hour == 0;
@@ -167,7 +168,7 @@ void loop() {
         now.hour() = g_hour;
         now.minute() = g_minute;
         now.second() = g_second;
-        rtc.now() = now;
+        g_rtc.now() = now;
         continue;
     }
     if (timeDownButtonState == LOW) {
@@ -188,7 +189,7 @@ void loop() {
         now.hour() = g_hour;
         now.minute() = g_minute;
         now.second() = g_second;
-        rtc.now() = now;
+        g_rtc.now() = now;
         continue;
     }
 }
