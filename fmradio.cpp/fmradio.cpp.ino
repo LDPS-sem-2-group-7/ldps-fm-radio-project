@@ -100,7 +100,7 @@ void loop() {
 
     // volume control
     if (g_reClkState != g_reLastState) {
-        Serial.print("RE pulse")
+        Serial.print("RE pulse");
         // pulse occured
         if (g_reDatState != g_reClkState) {
             // clockwise
@@ -150,10 +150,11 @@ void loop() {
         frequencyUpdate(current_frequency);
         continue;
     }
+
     if (timeUpButtonState == LOW) {
         DateTime now; // temp object, copied to global object
         Serial.print("Button press: timeUpButtonState");
-        if (g_hour == 23) {
+        if (g_hour == 23 && g_minute == 59) {
             g_hour == 0;
         }
         if (g_minute == 59) {
@@ -171,6 +172,7 @@ void loop() {
         g_rtc.now() = now;
         continue;
     }
+
     if (timeDownButtonState == LOW) {
         DateTime now;
         Serial.print("Button press: timeUpButtonState")
