@@ -83,7 +83,7 @@ void loop() {
 
 
     delay(500);
-    printTime(frequency);
+    print_display(frequency);
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
@@ -211,7 +211,7 @@ void displayVolume() {
     g_lcd.print(out_string);
 }
 
-void printTime(float frequency) {//default LCD output.
+void print_display(float frequency) {//default LCD output.
     /*
       |2020-13-45 15:00| >>> | 23 °
       |█████████       |
@@ -228,11 +228,39 @@ void printTime(float frequency) {//default LCD output.
     g_lcd.print(dateTime);
     g_lcd.rightToLeft();
     g_lcd.setCursor(3, 1);
-    g_lcd.print(frequency);//TODO: add station name;
+    g_lcd.print(frequency);
+
+    // TODO: this overwrites the time, do we want to add a delay?
+    string name = station_name(frequency);
+    g_lcd.setCursor(3, 0);
+    g_lcd.print(name);
 }
 
-string station_name(float frequency) {
+string station_name(float freq) {
+    // get the station names
+    string station_name = "";
 
+    if (freq == 105.8) {
+        station_name = "Absolute Radio";
+    } else if (97.1 <= freq && freq <= 99.7) {
+        station_name = "BBC Radio 1";
+    } else if (88.1 <= freq && freq <= 90.2) {
+        station_name = "BBC Radio 2";
+    } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
+        station_name = "BBC Radio 3";
+    } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
+        station_name = "BBC Radio 4";
+    } else if (99.9 <= freq && freq <= 101.9) {
+        station_name = "Classic FM";
+    } else if (freq == 100.0) {
+        station_name = "Kiss";
+    } else if (freq == 97.3) {
+        station_name = "LBC";
+    } else if (freq == 105.4) {
+        station_name = "Magic";
+    }
+
+    return station_name;
 }
 
 
