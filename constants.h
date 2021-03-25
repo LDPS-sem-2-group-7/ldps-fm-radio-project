@@ -2,10 +2,10 @@
 #define constants_h
 
 const int c_i2cDataPath = 0x27;
-const float c_minFreq = 96.4;
-const float c_maxFreq = 107.9;
-const float c_memFreq1 = 100.0; // TODO fix
-const float c_memFreq2 = 101.0;
+const float c_minFreq = 88.0;
+const float c_maxFreq = 108.0;
+const float c_memFreq1 = 96.4; // Eagle radio
+const float c_memFreq2 = 104.0; // BBC Surrey
 const int c_reDat = 3;
 const int c_reClk = 2;
 const int c_reSw = 4;

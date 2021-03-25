@@ -29,7 +29,7 @@ void setup() {
     Serial.print("Initialise radio object");
     AR1010 g_radio = AR1010();
     radio.initialise();
-    radio.setFrequency(c_minFreq);
+    radio.setFrequency(c_memFreq1);
     delay(500);
 
     // intialise the lcd
@@ -56,7 +56,7 @@ void setup() {
     g_lcd.setCursor(3, 0);
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
-    g_lcd.print(c_minFreq);
+    g_lcd.print(c_memFreq1);
 
     if (!g_rtc.isrunning()) {
         Serial.println("RTC is not running !");
