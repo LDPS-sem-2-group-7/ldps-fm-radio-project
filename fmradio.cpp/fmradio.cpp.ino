@@ -21,30 +21,30 @@ g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
 
 void setup() {
     // initialise the objects
-    Serial.print("Being initialisation")
+    Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
     delay(500);
 
     // set the frequency
-    Serial.print("Initialise radio object")
+    Serial.print("Initialise radio object");
     AR1010 g_radio = AR1010();
     radio.initialise();
     radio.setFrequency(c_minFreq);
     delay(500);
 
     // intialise the lcd
-    Serial.print("Initialise lcd object")
+    Serial.print("Initialise lcd object");
     LiquidCrystal_I2C g_lcd(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.begin();
     g_lcd.backlight();
     g_lcd.clear();
 
     // intialise the rtc
-    Serial.print("Initialise rtc")
+    Serial.print("Initialise rtc");
     DS3231 g_rtc(c_rtcPinSDA, c_rtcPinSCL);
 
     // initialise the rotary encoder
-    Serial.print("Initialise rotary encoder")
+    Serial.print("Initialise rotary encoder");
     pinMode(c_reDat, INPUT_PULLUP); // input pullup used in sims
     pinMode(c_reClk, INPUT_PULLUP);
     pinMode(c_reSw, INPUT_PULLUP);
@@ -52,7 +52,7 @@ void setup() {
     lastState = digitalRead(c_rotaryEncoderClk);
 
     // print the welcome message
-    Serial.print("Print welcome message") // TODO: we can do a real message
+    Serial.print("Print welcome message"); // TODO: we can do a real message
     g_lcd.setCursor(3, 0);
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
@@ -104,12 +104,12 @@ void loop() {
         // pulse occured
         if (g_reDatState != g_reClkState) {
             // clockwise
-            Serial.print("Clockwise turn")
+            Serial.print("Clockwise turn");
             g_volume++;
             displayVolume();
         } else {
             // anticlockwise
-            Serial.print("Anticlockwise turn")
+            Serial.print("Anticlockwise turn");
             g_volume--;
             displayVolume();
         }
@@ -119,22 +119,22 @@ void loop() {
 
     // memory buttons
     if (memButton1State == LOW) {
-        Serial.print("Button press: memButton1")
+        Serial.print("Button press: memButton1");
         frequencyUpdate(c_memFreq1);
         continue;
     }
 
     if (memButton2State == LOW) {
-        Serial.print("Button press: memButton2")
+        Serial.print("Button press: memButton2");
         frequencyUpdate(c_memFreq2);
         continue;
     }
 
     // frequency change buttons
     if (frequButton1State == LOW) {
-        Serial.print("Button press: frequButton1State")
+        Serial.print("Button press: frequButton1State");
         current_frequency = radio.seek('u');
-        if (current_frequency > c_maxFreq) {
+        if (current_frequency > c_maxFreq); {
             current_frequency = c_minFreq;
         }
         frequencyUpdate(current_frequency);
@@ -142,21 +142,21 @@ void loop() {
     }
 
     if (frequButton2State == LOW) {
-        Serial.print("Button press: frequButton2State")
+        Serial.print("Button press: frequButton2State");
         current_frequency = radio.seek('d');
-        if (current_frequency > c_minFreq) {
+        if (current_frequency > c_minFreq); {
             current_frequency = c_maxFreq;
         }
         frequencyUpdate(current_frequency);
         continue;
     }
     if (timeUpButtonState == LOW) {
-        Serial.print("Button press: timeUpButtonState")
+        Serial.print("Button press: timeUpButtonState");
         if (g_hour == 23) {
             g_hour == 0;
         }
         if (g_minute == 59) {
-            g_minute == 0
+            g_minute == 0;
             g_hour++;
         } else {
             g_minute++;
@@ -177,7 +177,7 @@ void loop() {
             g_hour == 23;
         }
         if (g_minute == 0) {
-            g_minute == 59
+            g_minute == 59;
             g_hour--;
         } else {
             g_minute--;
