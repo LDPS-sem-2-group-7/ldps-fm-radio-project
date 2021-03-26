@@ -44,11 +44,6 @@ void setup() {
     g_lcd.begin(c_lcdLen, c_lcdHeight, 2);
     g_lcd.backlight();
 
-    g_lcd.setCursor(0, 0);
-    g_lcd.print("Hello"); //temp
-    delay(50);
-    g_lcd.clear();
-
     // intialise the rtc
     Serial.print("Initialise rtc");
     DS3231 g_rtc = DS3231(); // no pins passed
@@ -67,7 +62,7 @@ void setup() {
     g_lcd.print("Welcome");
     g_lcd.setCursor(0, 1);
     g_lcd.print(c_memFreq1);
-    delay(5000);
+    delay(1000);
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC is not running !");
@@ -243,8 +238,8 @@ void printDisplay(float frequency) {//default LCD output.
     g_lcd.setCursor(3, 0);
     g_lcd.print(dateTimeTemp);
     g_lcd.rightToLeft();
-    g_lcd.setCursor(3, 1);
-    g_lcd.print(frequency);
+    g_lcd.setCursor(0, 1);
+    g_lcd.print("100.0"); // tmp, should print frequency
 
     // TODO: this overwrites the time, do we want to add a delay?
 //    String name = stationName(frequency);
@@ -283,7 +278,7 @@ void frequencyUpdate(float frequency) {
     // set the frequency
     g_radio.setFrequency(frequency);
     // print to the LCD
-    g_lcd.clear();
-    g_lcd.setCursor(3, 1); // TODO: test in labs
+//    g_lcd.clear();
+    g_lcd.setCursor(1, 1); // TODO: test in labs
     g_lcd.print(frequency);
 }
