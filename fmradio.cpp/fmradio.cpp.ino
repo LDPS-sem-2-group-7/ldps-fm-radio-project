@@ -13,7 +13,7 @@ int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
 int g_reSwState = 0;
-int g_volume = 0;
+int g_volume = 5;
 int g_day = 0;
 int g_month = 0;
 int g_year = 0;
@@ -41,6 +41,9 @@ void setup() {
     g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1);
+    g_radio.seek('u');
+        g_radio.setVolume(10);
+
     delay(500);
 
     // intialise the lcd
@@ -94,7 +97,7 @@ void setup() {
 
 void loop() {
     // set variables
-    float current_frequency = c_minFreq;
+    float current_frequency = c_memFreq1;
 
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
@@ -121,7 +124,8 @@ void loop() {
     } else {
         g_muteState = false;
     }
-    g_radio.setHardmute(g_muteState);
+//    g_radio.setHardmute(g_muteState); // 
+g_radio.setHardmute(false);
 
     // volume control
     if (g_reClkState != g_reLastState) {
@@ -136,26 +140,26 @@ void loop() {
             Serial.print("Anticlockwise turn");
             g_volume--;
         }
-        g_volChangeState = 50;
     }
+    
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
     // memory buttons
-    if (memButton1State == LOW) {
-        Serial.print("Button press: memButton1");
-        g_radio.setFrequency(c_memFreq1);
-        return NULL;
-    }
-
-    if (memButton2State == LOW) {
-        Serial.print("Button press: memButton2");
-        g_radio.setFrequency(c_memFreq2);
-        return NULL;
-    }
+//    if (memButton1State == LOW) {
+//        Serial.print("Button press: memButton1");
+//        g_radio.setFrequency(c_memFreq1);
+//        return NULL;
+//    }
+//
+//    if (memButton2State == LOW) {
+//        Serial.print("Button press: memButton2");
+//        g_radio.setFrequency(c_memFreq2);
+//        return NULL;
+//    }
 
     // frequency change buttons
-    if (frequButton1State == LOW) {
+    if (frequButton1State == HIGH) {
         Serial.print("Button press: frequButton1State");
         current_frequency = g_radio.seek('u');
         if (current_frequency > c_maxFreq) {
@@ -165,7 +169,7 @@ void loop() {
         return NULL;
     }
 
-    if (frequButton2State == LOW) {
+    if (frequButton2State == HIGH) {
         Serial.print("Button press: frequButton2State");
         current_frequency = g_radio.seek('d');
         if (current_frequency > c_minFreq) {
@@ -175,7 +179,7 @@ void loop() {
         return NULL;
     }
 
-       if (g_timeHourButtonState == LOW) {
+       if (g_timeHourButtonState == HIGH) {
            Serial.print("Button press: g_timeHourButtonState");
 
            g_hour++;
@@ -187,7 +191,7 @@ void loop() {
            return NULL;
        }
 
-       if (g_timeMinButtonState == LOW) {
+       if (g_timeMinButtonState == HIGH) {
            Serial.print("Button press: g_timeMinButtonState");
 
            g_minute++;
@@ -230,21 +234,20 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     */
 
     // Make the time string
-    //    String date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
-    //    String time = to_string(g_hour) + ':' + to_string(g_minute);
-    //    String temp = to_string(g_rtc.getTemp()) + 'C';
-    //    String dateTimeTemp = date + time + temp;
-    String dateTimeTemp = "TEMPORARY"; // TODO: fix
+        String date = String(g_year) + '/' + String(g_month) + '/' + String(g_day);
+        String time = String(g_hour) + ':' + String(g_minute);
+        String temp = String(g_rtc.getTemperature()) + 'C';
+        String dateTimeTemp = date + time + temp;
 
     //Write the time string
     g_lcd.clear();
-    g_lcd.setCursor(3, 0);
+    g_lcd.setCursor(0, 0);
     g_lcd.print(dateTimeTemp);
-    g_lcd.rightToLeft();
+    g_lcd.scrollDisplayRight();
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
-    g_lcd.print("100.0"); // tmp, should print frequency
+    g_lcd.print(frequency); // tmp, should print frequency
 
     // If frequency changed, and available, display radio station name
     String name = stationName(frequency);
