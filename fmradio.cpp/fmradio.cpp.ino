@@ -63,7 +63,7 @@ void setup() {
     g_reLastState = digitalRead(c_reClk);
 
     // print the welcome message
-    Serial.print("Print welcome message"); // TODO: we can do a real message
+    Serial.print("Print welcome message");
     g_lcd.setCursor(3, 0);
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
