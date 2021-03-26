@@ -27,9 +27,9 @@ When the volume rotary encoder is turned then we show the volume increasing and 
 
 ## Prerequisites
 Please find the following prerequisites inside the repo.
-  * AR1010lib & A1010lib.cpp
+  * AR1010lib.h & A1010lib.cpp
   * LiquidCrystal_I2C.h & LiquidCrystal_I2C.cpp
-  * DS3231.h & DS3231.h
+  * DS3231.h & DS3231.cpp
 
 
 
