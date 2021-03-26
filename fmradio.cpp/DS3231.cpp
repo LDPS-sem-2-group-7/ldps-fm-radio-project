@@ -22,7 +22,7 @@ David Merrifield
 Released into the public domain.
 */
 
-#include <DS3231.h>
+#include "DS3231.h"
 
 // These included for the DateTime class inclusion; will try to find a way to
 // not need them in the future...
@@ -744,4 +744,3 @@ void DS3231::writeControlByte(byte control, bool which) {
 	Wire.write(control);
 	Wire.endTransmission();
 }
-
