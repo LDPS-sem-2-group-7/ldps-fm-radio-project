@@ -20,6 +20,9 @@ int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
 float g_muteState = false;
+int g_freqChangeState = 0;
+int g_volChangeState = 0;
+
 //int g_second = 0; removed for clarity and efficiency
 //////g_volume = constrain(g_volume, c_minVolume, c_maxVolume); // TODO constrain w/out  equaling
 
@@ -45,14 +48,11 @@ void setup() {
     //    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.backlight();
-<<<<<<< HEAD
 
     // intialise the rtc
     Serial.print("Initialise rtc");
     DS3231 g_rtc = DS3231(); // no pins passed
-=======
     g_lcd.clear();
->>>>>>> be4d495e2ebf467588f45b7a1c76c21b4a668fa9
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
@@ -68,10 +68,7 @@ void setup() {
     g_lcd.print("EAGLE RADIO");
     g_lcd.setCursor(3, 1);
     g_lcd.print(c_memFreq1);
-<<<<<<< HEAD
     delay(1000);
-=======
->>>>>>> be4d495e2ebf467588f45b7a1c76c21b4a668fa9
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC is not running !");
@@ -108,8 +105,10 @@ void loop() {
     int g_timeMinButtonState = digitalRead(c_timeMin);
 
 
+    g_volChangeState--;
+    g_freqChangeState--;
     delay(500);
-    printDisplay(current_frequency);
+    printDisplay(current_frequency, 0, 0);
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
@@ -132,13 +131,12 @@ void loop() {
             // clockwise
             Serial.print("Clockwise turn");
             g_volume++;
-            displayVolume();
         } else {
             // anticlockwise
             Serial.print("Anticlockwise turn");
             g_volume--;
-            displayVolume();
         }
+        g_volChangeState = 50;
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
@@ -146,13 +144,13 @@ void loop() {
     // memory buttons
     if (memButton1State == LOW) {
         Serial.print("Button press: memButton1");
-        frequencyUpdate(c_memFreq1);
+        g_radio.setFrequency(c_memFreq1);
         return NULL;
     }
 
     if (memButton2State == LOW) {
         Serial.print("Button press: memButton2");
-        frequencyUpdate(c_memFreq2);
+        g_radio.setFrequency(c_memFreq2);
         return NULL;
     }
 
@@ -163,7 +161,7 @@ void loop() {
         if (current_frequency > c_maxFreq) {
             current_frequency = c_minFreq;
         }
-        frequencyUpdate(current_frequency);
+        g_radio.setFrequency(current_frequency);
         return NULL;
     }
 
@@ -173,7 +171,7 @@ void loop() {
         if (current_frequency > c_minFreq) {
             current_frequency = c_maxFreq;
         }
-        frequencyUpdate(current_frequency);
+        g_radio.setFrequency(current_frequency);
         return NULL;
     }
 
@@ -190,7 +188,7 @@ void loop() {
        }
 
        if (g_timeMinButtonState == LOW) {
-           Serial.print("Button press: g_timeMinButtonState")
+           Serial.print("Button press: g_timeMinButtonState");
 
            g_minute++;
            if (g_minute == 60) {
@@ -200,9 +198,11 @@ void loop() {
           g_rtc.setMinute(g_minute);
            return NULL;
        }
+
+
 }
 
-void displayVolume() {
+String get_volume() {
     String out_string;
     int count = g_volume * (16 / 18); // sets number of bars to complete
 
@@ -221,30 +221,38 @@ void displayVolume() {
     g_lcd.print(out_string);
 }
 
-void printDisplay(float frequency) {//default LCD output.
+void printDisplay(float frequency, int volCount, int freqCount) {
     /*
       |2020-13-45 15:00| >>> | 23 °
       |█████████       |
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
-    //
+
+    // Make the time string
     //    String date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
     //    String time = to_string(g_hour) + ':' + to_string(g_minute);
     //    String temp = to_string(g_rtc.getTemp()) + 'C';
     //    String dateTimeTemp = date + time + temp;
     String dateTimeTemp = "TEMPORARY"; // TODO: fix
+
+    //Write the time string
     g_lcd.clear();
     g_lcd.setCursor(3, 0);
     g_lcd.print(dateTimeTemp);
     g_lcd.rightToLeft();
+
+    // Write the frequency string
     g_lcd.setCursor(0, 1);
     g_lcd.print("100.0"); // tmp, should print frequency
 
-    // TODO: this overwrites the time, do we want to add a delay?
+    // If frequency changed, and available, display radio station name
     String name = stationName(frequency);
     g_lcd.setCursor(3, 0);
     g_lcd.print(name);
+
+    // if volume changed, set
+    
 }
 
 String stationName(float freq) {
@@ -272,13 +280,4 @@ String stationName(float freq) {
     }
 
     return stationName;
-}
-
-void frequencyUpdate(float frequency) {
-    // set the frequency
-    g_radio.setFrequency(frequency);
-    // print to the LCD
-//    g_lcd.clear();
-    g_lcd.setCursor(1, 1); // TODO: test in labs
-    g_lcd.print(frequency);
 }
