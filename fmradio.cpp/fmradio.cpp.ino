@@ -21,7 +21,6 @@ int g_hour = 0;
 int g_minute = 0;
 float g_muteState = false;
 //int g_second = 0; removed for clarity and efficiency
-//////g_volume = constrain(g_volume, c_minVolume, c_maxVolume); // todo
 
 AR1010 g_radio;
 LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);;
@@ -125,6 +124,7 @@ void loop() {
             g_volume--;
             displayVolume();
         }
+        g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
