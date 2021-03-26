@@ -41,7 +41,7 @@ void setup() {
 
     // intialise the lcd
     Serial.print("Initialise lcd object");
-//    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+    //    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.backlight();
     g_lcd.clear();
@@ -67,16 +67,16 @@ void setup() {
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC is not running !");
-//        g_rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
+        //        g_rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
     }
-    
+
     //set the time to the globals.
     g_year = g_rtc.getYear();
-//    g_month = g_rtc.getMonth(true);
-g_month = 3;
+    //    g_month = g_rtc.getMonth(true);
+    g_month = 3;
     g_day = g_rtc.getDate();
-//    g_hour = g_rtc.getHour();
-g_hour = 11;
+    //    g_hour = g_rtc.getHour();
+    g_hour = 11;
     g_minute = g_rtc.getMinute();
     delay(500);
 }
@@ -163,43 +163,43 @@ void loop() {
         return NULL;
     }
 
-//    if (g_timeHourButtonState == LOW) {
-//        DateTime now; // temp object, copied to global object
-//        Serial.print("Button press: g_timeHourButtonState");
-//
-//        g_hour++;
-//        if (g_hour == 24) {
-//            g_hour = 0;
-//        }
-//
-//        now.month() = g_month;
-//        now.day() = g_day;
-//        now.year() = g_day;
-//        now.hour() = g_hour;
-//        now.minute() = g_minute;
-//        now.second() = g_second;
-//        g_rtc.now() = now;
-//        return NULL;
-//    }
-//
-//    if (g_timeMinButtonState == LOW) {
-//        DateTime now;
-//        Serial.print("Button press: g_timeMinButtonState")
-//
-//        g_minute++;
-//        if (g_minute == 60) {
-//            g_minute = 0;
-//        }
-//
-//        now.month() = g_month;
-//        now.day() = g_day;
-//        now.year() = g_day;
-//        now.hour() = g_hour;
-//        now.minute() = g_minute;
-//        now.second() = g_second;
-//        g_rtc.now() = now;
-//        return NULL;
-//    }
+    //    if (g_timeHourButtonState == LOW) {
+    //        DateTime now; // temp object, copied to global object
+    //        Serial.print("Button press: g_timeHourButtonState");
+    //
+    //        g_hour++;
+    //        if (g_hour == 24) {
+    //            g_hour = 0;
+    //        }
+    //
+    //        now.month() = g_month;
+    //        now.day() = g_day;
+    //        now.year() = g_day;
+    //        now.hour() = g_hour;
+    //        now.minute() = g_minute;
+    //        now.second() = g_second;
+    //        g_rtc.now() = now;
+    //        return NULL;
+    //    }
+    //
+    //    if (g_timeMinButtonState == LOW) {
+    //        DateTime now;
+    //        Serial.print("Button press: g_timeMinButtonState")
+    //
+    //        g_minute++;
+    //        if (g_minute == 60) {
+    //            g_minute = 0;
+    //        }
+    //
+    //        now.month() = g_month;
+    //        now.day() = g_day;
+    //        now.year() = g_day;
+    //        now.hour() = g_hour;
+    //        now.minute() = g_minute;
+    //        now.second() = g_second;
+    //        g_rtc.now() = now;
+    //        return NULL;
+    //    }
 }
 
 void displayVolume() {
@@ -207,8 +207,8 @@ void displayVolume() {
     int count = g_volume * (16 / 18); // sets number of bars to complete
 
     // create the string
-//    out_string = String(count, "█") + String(16 - count, " ");
-out_string = "temp";
+    //    out_string = String(count, "█") + String(16 - count, " ");
+    out_string = "temp";
 
     // check if muted
     if (g_muteState) {
@@ -228,12 +228,12 @@ void printDisplay(float frequency) {//default LCD output.
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
-//
-//    String date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
-//    String time = to_string(g_hour) + ':' + to_string(g_minute);
-//    String temp = to_string(g_rtc.getTemp()) + 'C';
-//    String dateTimeTemp = date + time + temp;
-String dateTimeTemp = "TEMPORARY"; // TODO: fix
+    //
+    //    String date = to_string(g_year) + '/' + to_string(g_month) + '/' + to_string(g_day);
+    //    String time = to_string(g_hour) + ':' + to_string(g_minute);
+    //    String temp = to_string(g_rtc.getTemp()) + 'C';
+    //    String dateTimeTemp = date + time + temp;
+    String dateTimeTemp = "TEMPORARY"; // TODO: fix
     g_lcd.clear();
     g_lcd.setCursor(3, 0);
     g_lcd.print(dateTimeTemp);
