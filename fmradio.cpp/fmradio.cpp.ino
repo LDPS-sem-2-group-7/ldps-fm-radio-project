@@ -23,26 +23,30 @@ float g_muteState = false;
 //int g_second = 0; removed for clarity and efficiency
 
 AR1010 g_radio;
-LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);;
+LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdLen, c_lcdHeight);;
 
 void setup() {
     // initialise the objects
     Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
-    delay(500);
+    delay(50);
 
     // set the frequency
     Serial.print("Initialise radio object");
     g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1);
-    delay(500);
+    delay(50);
 
     // intialise the lcd
     Serial.print("Initialise lcd object");
-    //    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
-    g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+    //    g_lcd = LiquidCrystal_I2C(c_lcdLen, c_lcdHeight, 2);
+    g_lcd.begin(c_lcdLen, c_lcdHeight, 2);
     g_lcd.backlight();
+
+    g_lcd.setCursor(0, 0);
+    g_lcd.print("Hello"); //temp
+    delay(50);
     g_lcd.clear();
 
     // intialise the rtc
@@ -59,10 +63,11 @@ void setup() {
 
     // print the welcome message
     Serial.print("Print welcome message"); // TODO: we can do a real message
-    g_lcd.setCursor(3, 0);
-    g_lcd.print("EAGLE RADIO");
-    g_lcd.setCursor(3, 1);
+    g_lcd.setCursor(0, 0);
+    g_lcd.print("Welcome");
+    g_lcd.setCursor(0, 1);
     g_lcd.print(c_memFreq1);
+    delay(5000);
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC is not running !");
@@ -242,9 +247,9 @@ void printDisplay(float frequency) {//default LCD output.
     g_lcd.print(frequency);
 
     // TODO: this overwrites the time, do we want to add a delay?
-    String name = stationName(frequency);
-    g_lcd.setCursor(3, 0);
-    g_lcd.print(name);
+//    String name = stationName(frequency);
+//    g_lcd.setCursor(3, 0);
+//    g_lcd.print(name);
 }
 
 String stationName(float freq) {
