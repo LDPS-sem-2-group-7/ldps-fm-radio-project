@@ -21,37 +21,31 @@ int g_hour = 0;
 int g_minute = 0;
 float g_muteState = false;
 //int g_second = 0; removed for clarity and efficiency
+//////g_volume = constrain(g_volume, c_minVolume, c_maxVolume); // TODO constrain w/out  equaling
 
 AR1010 g_radio;
-LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdLen, c_lcdHeight);;
+LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+DS3231 g_rtc = DS3231(); // no pins passed
 
 void setup() {
     // initialise the objects
     Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
-    delay(50);
+    delay(500);
 
     // set the frequency
     Serial.print("Initialise radio object");
     g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1);
-    delay(50);
+    delay(500);
 
     // intialise the lcd
     Serial.print("Initialise lcd object");
-    //    g_lcd = LiquidCrystal_I2C(c_lcdLen, c_lcdHeight, 2);
-    g_lcd.begin(c_lcdLen, c_lcdHeight, 2);
+    //    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+    g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.backlight();
-
-    g_lcd.setCursor(0, 0);
-    g_lcd.print("Hello"); //temp
-    delay(50);
     g_lcd.clear();
-
-    // intialise the rtc
-    Serial.print("Initialise rtc");
-    DS3231 g_rtc = DS3231(); // no pins passed
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
@@ -63,15 +57,20 @@ void setup() {
 
     // print the welcome message
     Serial.print("Print welcome message"); // TODO: we can do a real message
-    g_lcd.setCursor(0, 0);
-    g_lcd.print("Welcome");
-    g_lcd.setCursor(0, 1);
+    g_lcd.setCursor(3, 0);
+    g_lcd.print("EAGLE RADIO");
+    g_lcd.setCursor(3, 1);
     g_lcd.print(c_memFreq1);
-    delay(5000);
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC is not running !");
         //        g_rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
+        g_rtc.setDate(26);
+        g_rtc.setMonth(03);
+        g_rtc.setYear(21);
+        g_rtc.setHour(10);
+        g_rtc.setMinute(30);
+        g_rtc.setSecond(00);
     }
 
     //set the time to the globals.
@@ -129,7 +128,6 @@ void loop() {
             g_volume--;
             displayVolume();
         }
-        g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
     }
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
@@ -168,43 +166,29 @@ void loop() {
         return NULL;
     }
 
-    //    if (g_timeHourButtonState == LOW) {
-    //        DateTime now; // temp object, copied to global object
-    //        Serial.print("Button press: g_timeHourButtonState");
-    //
-    //        g_hour++;
-    //        if (g_hour == 24) {
-    //            g_hour = 0;
-    //        }
-    //
-    //        now.month() = g_month;
-    //        now.day() = g_day;
-    //        now.year() = g_day;
-    //        now.hour() = g_hour;
-    //        now.minute() = g_minute;
-    //        now.second() = g_second;
-    //        g_rtc.now() = now;
-    //        return NULL;
-    //    }
-    //
-    //    if (g_timeMinButtonState == LOW) {
-    //        DateTime now;
-    //        Serial.print("Button press: g_timeMinButtonState")
-    //
-    //        g_minute++;
-    //        if (g_minute == 60) {
-    //            g_minute = 0;
-    //        }
-    //
-    //        now.month() = g_month;
-    //        now.day() = g_day;
-    //        now.year() = g_day;
-    //        now.hour() = g_hour;
-    //        now.minute() = g_minute;
-    //        now.second() = g_second;
-    //        g_rtc.now() = now;
-    //        return NULL;
-    //    }
+       if (g_timeHourButtonState == LOW) {
+           Serial.print("Button press: g_timeHourButtonState");
+
+           g_hour++;
+           if (g_hour == 24) {
+               g_hour = 0;
+           }
+
+              g_rtc.setHour(g_hour);
+           return NULL;
+       }
+
+       if (g_timeMinButtonState == LOW) {
+           Serial.print("Button press: g_timeMinButtonState")
+
+           g_minute++;
+           if (g_minute == 60) {
+               g_minute = 0;
+           }
+
+          g_rtc.setMinute(g_minute);
+           return NULL;
+       }
 }
 
 void displayVolume() {
@@ -247,9 +231,9 @@ void printDisplay(float frequency) {//default LCD output.
     g_lcd.print(frequency);
 
     // TODO: this overwrites the time, do we want to add a delay?
-//    String name = stationName(frequency);
-//    g_lcd.setCursor(3, 0);
-//    g_lcd.print(name);
+    String name = stationName(frequency);
+    g_lcd.setCursor(3, 0);
+    g_lcd.print(name);
 }
 
 String stationName(float freq) {
