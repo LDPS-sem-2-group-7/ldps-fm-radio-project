@@ -19,7 +19,7 @@ int g_month = 0;
 int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
-float g_muteState = false;
+bool g_muteState = false;
 int g_freqChangeState = 0;
 int g_volChangeState = 0;
 
@@ -42,7 +42,7 @@ void setup() {
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1);
     g_radio.seek('u');
-        g_radio.setVolume(10);
+    g_radio.setVolume(10);
 
     delay(500);
 
@@ -107,11 +107,26 @@ void loop() {
     int g_timeHourButtonState = digitalRead(c_timeHour);
     int g_timeMinButtonState = digitalRead(c_timeMin);
 
+    // volume and freq change state.
+    if (g_volChangeState > 0) {
+        g_volChangeState--;
+    }
 
-    g_volChangeState--;
-    g_freqChangeState--;
+    if (g_freqChangeState > 0) {
+        g_freqChangeState--;
+    }
+
+    // if vol and freq changed in quick succession, keep last change
+    if (g_volChangeState && g_freqChangeState) {
+        if (g_volChangeState > g_freqChangeState) {
+            g_freqChangeState = 0;
+        } else {
+            g_volChangeState = 0;
+        }
+    }
+
     delay(500);
-    printDisplay(current_frequency, 0, 0);
+    printDisplay(current_frequency, g_volChangeState, g_freqChangeState);
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
@@ -124,8 +139,8 @@ void loop() {
     } else {
         g_muteState = false;
     }
-//    g_radio.setHardmute(g_muteState); // 
-g_radio.setHardmute(false);
+    //    g_radio.setHardmute(g_muteState); //
+    g_radio.setHardmute(false); // TODO: make the mute button work (first)
 
     // volume control
     if (g_reClkState != g_reLastState) {
@@ -140,23 +155,26 @@ g_radio.setHardmute(false);
             Serial.print("Anticlockwise turn");
             g_volume--;
         }
+        g_volChangeState = 50; // TODO: is this number right?
     }
-    
+
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
     // memory buttons
-//    if (memButton1State == LOW) {
-//        Serial.print("Button press: memButton1");
-//        g_radio.setFrequency(c_memFreq1);
-//        return NULL;
-//    }
-//
-//    if (memButton2State == LOW) {
-//        Serial.print("Button press: memButton2");
-//        g_radio.setFrequency(c_memFreq2);
-//        return NULL;
-//    }
+    //    if (memButton1State == LOW) {
+    //        Serial.print("Button press: memButton1");
+    //        g_radio.setFrequency(c_memFreq1);
+    //        g_freqChangeState = 50;
+    //        return NULL;
+    //    }
+    //
+    //    if (memButton2State == LOW) {
+    //        Serial.print("Button press: memButton2");
+    //        g_radio.setFrequency(c_memFreq2);
+    //        g_freqChangeState = 50;
+    //        return NULL;
+    //    }
 
     // frequency change buttons
     if (frequButton1State == HIGH) {
@@ -166,6 +184,7 @@ g_radio.setHardmute(false);
             current_frequency = c_minFreq;
         }
         g_radio.setFrequency(current_frequency);
+        g_freqChangeState = 50;
         return NULL;
     }
 
@@ -176,53 +195,33 @@ g_radio.setHardmute(false);
             current_frequency = c_maxFreq;
         }
         g_radio.setFrequency(current_frequency);
+        g_freqChangeState = 50;
         return NULL;
     }
 
-       if (g_timeHourButtonState == HIGH) {
-           Serial.print("Button press: g_timeHourButtonState");
+    if (g_timeHourButtonState == HIGH) {
+        Serial.print("Button press: g_timeHourButtonState");
 
-           g_hour++;
-           if (g_hour == 24) {
-               g_hour = 0;
-           }
+        g_hour++;
+        if (g_hour == 24) {
+            g_hour = 0;
+        }
 
-              g_rtc.setHour(g_hour);
-           return NULL;
-       }
-
-       if (g_timeMinButtonState == HIGH) {
-           Serial.print("Button press: g_timeMinButtonState");
-
-           g_minute++;
-           if (g_minute == 60) {
-               g_minute = 0;
-           }
-
-          g_rtc.setMinute(g_minute);
-           return NULL;
-       }
-
-
-}
-
-String get_volume() {
-    String out_string;
-    int count = g_volume * (16 / 18); // sets number of bars to complete
-
-    // create the string
-    //    out_string = String(count, "█") + String(16 - count, " ");
-    out_string = "temp";
-
-    // check if muted
-    if (g_muteState) {
-        out_string = "MUTED";
+        g_rtc.setHour(g_hour);
+        return NULL;
     }
 
-    // print to the lcd
-    g_lcd.clear();
-    g_lcd.setCursor(3, 1);
-    g_lcd.print(out_string);
+    if (g_timeMinButtonState == HIGH) {
+        Serial.print("Button press: g_timeMinButtonState");
+
+        g_minute++;
+        if (g_minute == 60) {
+            g_minute = 0;
+        }
+
+        g_rtc.setMinute(g_minute);
+        return NULL;
+    }
 }
 
 void printDisplay(float frequency, int volCount, int freqCount) {
@@ -234,12 +233,12 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     */
 
     // Make the time string
-        String date = String(g_year) + '/' + String(g_month) + '/' + String(g_day);
-        String time = String(g_hour) + ':' + String(g_minute);
-        String temp = String(g_rtc.getTemperature()) + 'C';
-        String dateTimeTemp = date + time + temp;
+    String date = String(g_year) + '/' + String(g_month) + '/' + String(g_day);
+    String time = String(g_hour) + ':' + String(g_minute);
+    String temp = String(g_rtc.getTemperature()) + 'C';
+    String dateTimeTemp = date + time + temp;
 
-    //Write the time string
+    // Write the time string
     g_lcd.clear();
     g_lcd.setCursor(0, 0);
     g_lcd.print(dateTimeTemp);
@@ -249,17 +248,40 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     g_lcd.setCursor(0, 1);
     g_lcd.print(frequency); // tmp, should print frequency
 
-    // If frequency changed, and available, display radio station name
-    String name = stationName(frequency);
-    g_lcd.setCursor(3, 0);
-    g_lcd.print(name);
+    // If volume changed, set
+    if (volCount) {
+        String vStr = volumeString(g_volume);
+        g_lcd.setCursor(3, 0);
+        g_lcd.print(name);
+    }
 
-    // if volume changed, set
-    
+    // If frequency changed, and available, display radio station name
+    if (freqCount) {
+        String name = stationName(frequency);
+        if (name == "") {
+            break;
+        }
+        g_lcd.setCursor(3, 0);
+        g_lcd.print(name);
+    }
+}
+
+String volumeString(int volume) {
+    String out_string;
+    int count = volume * (16 / 18); // sets number of bars to complete
+
+    // create the string
+    out_string = String(count, "█") + String(16 - count, " ");
+
+    // check if muted
+    if (g_muteState) {
+        out_string = "MUTED";
+    }
+
+    return out_string;
 }
 
 String stationName(float freq) {
-    // get the station names
     String stationName = "";
 
     if (freq == 105.8) {
