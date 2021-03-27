@@ -4,10 +4,8 @@
 #include <string.h>
 #include "constants.h"
 #include "DS3231.h"
-
 #include "stdlib.h"
 
-// constants moved to constants.h
 // global variables, g_ corresponds to global
 int g_reClkState = 0;
 int g_reDatState = 0;
@@ -19,22 +17,19 @@ int g_month = 0;
 int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
-bool g_muteState = false;
 int g_freqChangeState = 0;
 int g_volChangeState = 0;
+bool g_muteState = false;
 
-//int g_second = 0; removed for clarity and efficiency
-//////g_volume = constrain(g_volume, c_minVolume, c_maxVolume); // TODO constrain w/out  equaling
-
+// global objects, intialised here
 AR1010 g_radio;
 LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
 DS3231 g_rtc = DS3231(); // no pins passed
 
 void setup() {
-    // initialise the objects
     Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
-    delay(500);
+    delay(50);
 
     // set the frequency
     Serial.print("Initialise radio object");
@@ -44,11 +39,10 @@ void setup() {
     g_radio.seek('u');
     g_radio.setVolume(10);
 
-    delay(500);
+    delay(50);
 
     // intialise the lcd
     Serial.print("Initialise lcd object");
-    //    g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.backlight();
 
@@ -65,17 +59,8 @@ void setup() {
     Serial.begin(9600); // set baud rate
     g_reLastState = digitalRead(c_reClk);
 
-    // print the welcome message
-    Serial.print("Print welcome message");
-    g_lcd.setCursor(3, 0);
-    g_lcd.print("EAGLE RADIO");
-    g_lcd.setCursor(3, 1);
-    g_lcd.print(c_memFreq1);
-    delay(1000);
-
     if (!g_rtc.oscillatorCheck()) {
-        Serial.println("RTC is not running !");
-        //        g_rtc.adjust(DateTime(03 26 2021, 10 : 30 : 00));
+        Serial.println("RTC not running, set date and time");
         g_rtc.setDate(26);
         g_rtc.setMonth(03);
         g_rtc.setYear(21);
@@ -86,11 +71,9 @@ void setup() {
 
     //set the time to the globals.
     g_year = g_rtc.getYear();
-    //    g_month = g_rtc.getMonth(true);
-    g_month = 3;
+    g_month = 3; // TODO
     g_day = g_rtc.getDate();
-    //    g_hour = g_rtc.getHour();
-    g_hour = 11;
+    g_hour = 11; // TODO
     g_minute = g_rtc.getMinute();
     delay(500);
 }
