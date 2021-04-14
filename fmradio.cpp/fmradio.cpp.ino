@@ -216,10 +216,7 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     */
 
     // Make the time string
-    String date = String(g_year) + '/' + String(g_month) + '/' + String(g_day);
-    String time = String(g_hour) + ':' + String(g_minute);
     String temp = String(g_rtc.getTemperature()) + 'C';
-    String dateTimeTemp = date + time + temp;
 
     // Write the time string
     g_lcd.clear();
