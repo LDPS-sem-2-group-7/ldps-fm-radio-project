@@ -68,6 +68,13 @@ void setup() {
         g_rtc.setMinute(30);
         g_rtc.setSecond(00);
     }
+
+    pinMode(c_reClk, INPUT);
+    pinMode(c_reDat, INPUT);
+
+    attachInterrupt(0, volumeFlagUp, RISING);
+
+
     delay(500);
 }
 
@@ -117,22 +124,6 @@ void loop() {
     }
     //    g_radio.setHardmute(g_muteState); //
     g_radio.setHardmute(false); // TODO: make the mute button work (first)
-
-    // volume control
-    if (g_reClkState != g_reLastState) {
-        Serial.print("RE pulse");
-        // pulse occured
-        if (g_reDatState != g_reClkState) {
-            // clockwise
-            Serial.print("Clockwise turn");
-            g_volume++;
-        } else {
-            // anticlockwise
-            Serial.print("Anticlockwise turn");
-            g_volume--;
-        }
-        g_volChangeState = 50; // TODO: is this number right?
-    }
 
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
@@ -208,13 +199,13 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
 
-    String dateTime = String(g_rtc.getHour()) +':' +String(g_rtc.getMinute()) + '|' String(g_rtc.getDay() + '/'+ String(g_rtc.getMonth()) +'/'+ String(g_rtc.getYear());
-    String temp = String(g_rtc.getTemperature()) + '°C ';
+    //String dateTime = String(g_rtc.getHour()) +':' +String(g_rtc.getMinute()) + '|' String(g_rtc.getDay() + '/'+ String(g_rtc.getMonth()) +'/'+ String(g_rtc.getYear());
+    String temp = String(g_rtc.getTemperature()) + "°C ";
 
     // Write the time string
     g_lcd.clear();
     g_lcd.setCursor(0, 0);
-    g_lcd.print(dateTime);
+    //g_lcd.print(dateTime);
     g_lcd.scrollDisplayRight();
 
     // Write the frequency string
@@ -226,15 +217,12 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     if (volCount) {
         String vStr = volumeString(g_volume);
         g_lcd.setCursor(3, 0);
-        g_lcd.print(name);
+       // g_lcd.print(name);
     }
 
     // If frequency changed, and available, display radio station name
     if (freqCount) {
         String name = stationName(frequency);
-        if (name == "") {
-            break;
-        }
         g_lcd.setCursor(3, 0);
         g_lcd.print(name);
     }
@@ -245,7 +233,7 @@ String volumeString(int volume) {
     int count = volume * (16 / 18); // sets number of bars to complete
 
     // create the string
-    out_string = String(count, "█") + String(16 - count, " ");
+    //out_string = String(count, "█") + String(16 - count, " ");
 
     // check if muted
     if (g_muteState) {
@@ -279,4 +267,20 @@ String stationName(float freq) {
     }
 
     return stationName;
+}
+
+void volumeFlagUp(){
+    g_volume++;
+    if (g_volume > 18) {
+        g_volume = 18;
+    }
+    g_volChangeState = 50;
+}
+
+void volumeFlagDown(){
+    g_volume--;
+    if (g_volume < 0) {
+        g_volume = 0;
+    }
+    g_volChangeState = 50;
 }
