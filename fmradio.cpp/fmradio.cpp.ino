@@ -68,13 +68,6 @@ void setup() {
         g_rtc.setMinute(30);
         g_rtc.setSecond(00);
     }
-
-    //set the time to the globals.
-    g_year = g_rtc.getYear();
-    g_month = 3; // TODO
-    g_day = g_rtc.getDate();
-    g_hour = 11; // TODO
-    g_minute = g_rtc.getMinute();
     delay(500);
 }
 
@@ -209,23 +202,24 @@ void loop() {
 
 void printDisplay(float frequency, int volCount, int freqCount) {
     /*
-      |2020-13-45 15:00| >>> | 23 °
+      |2020-13-45 15:00|
       |█████████       |
     OR
       |97.8HZ - EAGLE R| >>> | ADIO
     */
 
-    // Make the time string
-    String temp = String(g_rtc.getTemperature()) + 'C';
+    String dateTime = String(g_rtc.getHour()) +':' +String(g_rtc.getMinute()) + '|' String(g_rtc.getDay() + '/'+ String(g_rtc.getMonth()) +'/'+ String(g_rtc.getYear());
+    String temp = String(g_rtc.getTemperature()) + '°C ';
 
     // Write the time string
     g_lcd.clear();
     g_lcd.setCursor(0, 0);
-    g_lcd.print(dateTimeTemp);
+    g_lcd.print(dateTime);
     g_lcd.scrollDisplayRight();
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
+    g_lcd.print(temp);
     g_lcd.print(frequency); // tmp, should print frequency
 
     // If volume changed, set
