@@ -22,6 +22,7 @@ const int c_lcdLen = 16;
 const int c_lcdHeight = 2;
 const int c_minVolume = 0;
 const int c_maxVolume = 18;
+const int c_tickDelay = 500;
 
 
 #endif

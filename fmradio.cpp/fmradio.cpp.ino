@@ -53,9 +53,9 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
-    pinMode(c_reDat, INPUT_PULLUP); // input pullup used in sims
-    pinMode(c_reClk, INPUT_PULLUP);
-    pinMode(c_reSw, INPUT_PULLUP);
+    pinMode(c_reDat, INPUT); // input pullup used in sims
+    pinMode(c_reClk, INPUT);
+    pinMode(c_reSw, INPUT);
     Serial.begin(9600); // set baud rate
     g_reLastState = digitalRead(c_reClk);
 
@@ -76,7 +76,7 @@ void setup() {
     // TODO: add volume down
 
 
-    delay(500);
+    delay(50);
 }
 
 void loop() {
@@ -152,7 +152,7 @@ void loop() {
             current_frequency = c_minFreq;
         }
         g_radio.setFrequency(current_frequency);
-        g_freqChangeState = 50;
+        g_freqChangeState = c_tickDelay;
         return NULL;
     }
 
@@ -163,7 +163,7 @@ void loop() {
             current_frequency = c_maxFreq;
         }
         g_radio.setFrequency(current_frequency);
-        g_freqChangeState = 50;
+        g_freqChangeState = c_tickDelay;
         return NULL;
     }
 
@@ -200,7 +200,10 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
 
-    //String dateTime = String(g_rtc.getHour()) +':' +String(g_rtc.getMinute()) + '|' String(g_rtc.getDay() + '/'+ String(g_rtc.getMonth()) +'/'+ String(g_rtc.getYear());
+   // String dateTime = String(g_rtc.getHour(false, false)) +':' +String(g_rtc.getMinute()) + '|' String(g_rtc.getDay()) + '/'+ String(g_rtc.getMonth(false)) +'/'+ String(g_rtc.getYear());
+
+    bool a = false;
+    String dateTime = String(g_rtc.getMonth(a));
     String temp = String(g_rtc.getTemperature()) + "°C ";
 
     // Write the time string
@@ -211,7 +214,7 @@ void printDisplay(float frequency, int volCount, int freqCount) {
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
-    g_lcd.print(temp);
+    //g_lcd.print(temp);
     g_lcd.print(frequency); // tmp, should print frequency
 
     // If volume changed, set
@@ -235,6 +238,7 @@ String volumeString(int volume) {
 
     // create the string
     //out_string = String(count, "█") + String(16 - count, " ");
+    out_string = "VOL CHANGED";
 
     // check if muted
     if (g_muteState) {
@@ -275,7 +279,7 @@ void volumeFlagUp() {
     if (g_volume > 18) {
         g_volume = 18;
     }
-    g_volChangeState = 50;
+    g_volChangeState = c_tickDelay;
 }
 
 void volumeFlagDown() {
@@ -283,5 +287,5 @@ void volumeFlagDown() {
     if (g_volume < 0) {
         g_volume = 0;
     }
-    g_volChangeState = 50;
+    g_volChangeState = c_tickDelay;
 }
