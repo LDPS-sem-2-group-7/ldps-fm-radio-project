@@ -73,6 +73,7 @@ void setup() {
     pinMode(c_reDat, INPUT);
 
     attachInterrupt(0, volumeFlagUp, RISING);
+    // TODO: add volume down
 
 
     delay(500);
@@ -216,14 +217,14 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     // If volume changed, set
     if (volCount) {
         String vStr = volumeString(g_volume);
-        g_lcd.setCursor(3, 0);
-       // g_lcd.print(name);
+        g_lcd.setCursor(0, 1);
+        // g_lcd.print(name);
     }
 
     // If frequency changed, and available, display radio station name
     if (freqCount) {
         String name = stationName(frequency);
-        g_lcd.setCursor(3, 0);
+        g_lcd.setCursor(0, 1);
         g_lcd.print(name);
     }
 }
@@ -269,7 +270,7 @@ String stationName(float freq) {
     return stationName;
 }
 
-void volumeFlagUp(){
+void volumeFlagUp() {
     g_volume++;
     if (g_volume > 18) {
         g_volume = 18;
@@ -277,7 +278,7 @@ void volumeFlagUp(){
     g_volChangeState = 50;
 }
 
-void volumeFlagDown(){
+void volumeFlagDown() {
     g_volume--;
     if (g_volume < 0) {
         g_volume = 0;
