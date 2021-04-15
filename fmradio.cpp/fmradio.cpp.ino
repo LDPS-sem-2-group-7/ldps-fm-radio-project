@@ -189,9 +189,9 @@ void loop() {
     }
 
     if (g_timeHourButtonState == LOW) {
-              g_lcd.setCursor(0, 0);
+        g_lcd.setCursor(0, 0);
 
-      g_lcd.print("BUTTON t1");
+        g_lcd.print("BUTTON t1");
         Serial.print("Button press: g_timeHourButtonState");
 
         g_hour++;
@@ -204,9 +204,9 @@ void loop() {
     }
 
     if (g_timeMinButtonState == LOW) {
-              g_lcd.setCursor(0, 0);
+        g_lcd.setCursor(0, 0);
 
-      g_lcd.print("BUTTON t2");
+        g_lcd.print("BUTTON t2");
         Serial.print("Button press: g_timeMinButtonState");
 
         g_minute++;
@@ -219,14 +219,14 @@ void loop() {
     }
 }
 
-String PadTwo(String input){
-  String output;
-  if (input.length() == 1) {
-     output =  "0" + input;
+String PadTwo(String input) {
+    String output;
+    if (input.length() == 1) {
+        output = "0" + input;
     } else {
-      output = input;
-      }
-  return output;
+        output = input;
+    }
+    return output;
 }
 
 void printDisplay(float frequency, int volCount, int freqCount) {
@@ -237,8 +237,8 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
     bool a = false;
-    String dateTime = String(g_rtc.getHour(a, a)) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + String(g_rtc.getDate()) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
-     //dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|';
+    String dateTime = String(PadTwo(g_rtc.getHour(a, a))) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + PadTwo(String(g_rtc.getDate())) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
+    //dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|';
 
     String temperature;
     temperature = String(g_rtc.getTemperature());
@@ -268,11 +268,11 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     int padLen = 13 - name.length();
     String pad = "";
     for (int i = 0; i < padLen; i++) {
-      pad += " ";
+        pad += " ";
     }
     name += pad;
     name += temperature;
-    
+
     g_lcd.setCursor(0, 1);
     g_lcd.print(name);
 }
@@ -315,9 +315,8 @@ String stationName(float freq) {
     } else if (freq == 105.4) {
         stationName = "Magic";
     } else {
-      stationName = String(freq) + "Hz";
+        stationName = String(freq) + "Hz";
     }
-
 
     return stationName;
 }
