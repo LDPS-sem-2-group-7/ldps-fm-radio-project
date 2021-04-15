@@ -30,7 +30,7 @@ DS3231 g_rtc = DS3231(); // no pins passed
 void setup() {
     Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
-    
+
     // set the frequency
     Serial.print("Initialise radio object");
     g_radio = AR1010();
@@ -74,7 +74,7 @@ void setup() {
 }
 
 void loop() {
-    
+
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
     int memButton2State = digitalRead(c_memButton2Pin);
@@ -123,6 +123,26 @@ void loop() {
     //    g_radio.setHardmute(g_muteState); //
     g_radio.setHardmute(false); // TODO: make the mute button work (first)
 
+    // volume control
+    if (g_reClkState != g_reLastState) {
+        Serial.print("RE pulse");
+        // pulse occured
+        if (g_reDatState != g_reClkState) {
+            // clockwise
+            Serial.print("Clockwise turn");
+            g_volume++;
+            g_lcd.setCursor(0,0);
+            g_lcd.print(g_volume);
+        } else {
+            // anticlockwise
+            Serial.print("Anticlockwise turn");
+            g_volume--;
+            g_lcd.setCursor(0,0);
+            g_lcd.print(g_volume);
+        }
+
+    }
+
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
@@ -136,7 +156,7 @@ void loop() {
             g_freqChangeState = 50;
             return NULL;
         }
-    
+
         if (memButton2State == LOW) {
             g_lcd.setCursor(0, 0);
             g_lcd.print("BUTTON m2");
@@ -210,7 +230,7 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     String dateTime = String(g_rtc.getHour(a, a)) + ':' + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/'+ String(g_rtc.getMonth(a)) +'/'+ String(g_rtc.getYear());
     String temp = String(g_rtc.getTemperature()) + "°C ";
 
-    // Write the time string 
+    // Write the time string
     //g_lcd.clear();
     g_lcd.setCursor(0, 0);
     //g_lcd.print(dateTime);
