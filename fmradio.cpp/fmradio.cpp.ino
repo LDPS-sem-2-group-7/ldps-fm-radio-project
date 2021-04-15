@@ -51,12 +51,11 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
-    
+
     pinMode(c_reDat, INPUT); // input pullup used in sims
     pinMode(c_reClk, INPUT);
-    
-   attachInterrupt(0, volumeFlagUp, RISING);
-   attachInterrupt(1, volumeFlagDown, RISING);
+
+    attachInterrupt(0, volumeFlag, RISING);
 
     pinMode(c_reSw, INPUT);
     Serial.begin(9600); // set baud rate
@@ -71,11 +70,9 @@ void setup() {
         g_rtc.setMinute(30);
         g_rtc.setSecond(00);
     }
-
 }
 
 void loop() {
-
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
     int memButton2State = digitalRead(c_memButton2Pin);
@@ -148,26 +145,26 @@ void loop() {
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
-     //memory buttons
-        if (memButton1State == LOW) {
-            g_lcd.setCursor(0, 0);
-            g_lcd.print("BUTTON m1");
-            Serial.print("Button press: memButton1");
-            g_radio.setFrequency(c_memFreq1);
-            g_current_frequency = c_memFreq1;
-            g_freqChangeState = 50;
-            return NULL;
-        }
+    //memory buttons
+    if (memButton1State == LOW) {
+        g_lcd.setCursor(0, 0);
+        g_lcd.print("BUTTON m1");
+        Serial.print("Button press: memButton1");
+        g_radio.setFrequency(c_memFreq1);
+        g_current_frequency = c_memFreq1;
+        g_freqChangeState = 50;
+        return NULL;
+    }
 
-        if (memButton2State == LOW) {
-            g_lcd.setCursor(0, 0);
-            g_lcd.print("BUTTON m2");
-            Serial.print("Button press: memButton2");
-            g_radio.setFrequency(c_memFreq2);
-            g_current_frequency = c_memFreq2;
-            g_freqChangeState = 50;
-            return NULL;
-        }
+    if (memButton2State == LOW) {
+        g_lcd.setCursor(0, 0);
+        g_lcd.print("BUTTON m2");
+        Serial.print("Button press: memButton2");
+        g_radio.setFrequency(c_memFreq2);
+        g_current_frequency = c_memFreq2;
+        g_freqChangeState = 50;
+        return NULL;
+    }
 
     // frequency change buttons
     if (frequButton1State == LOW) {
@@ -229,19 +226,19 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
     bool a = false;
-    String dateTime = String(g_rtc.getHour(a, a)) + ':' + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/'+ String(g_rtc.getMonth(a)) +'/'+ String(g_rtc.getYear());
+    String dateTime = String(g_rtc.getHour(a, a)) + ':' + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/' + String(g_rtc.getMonth(a)) + '/' + String(g_rtc.getYear());
     String temp = String(g_rtc.getTemperature()) + "°C ";
 
     // Write the time string
     //g_lcd.clear();
     g_lcd.setCursor(0, 0);
     //g_lcd.print(dateTime);
-   // g_lcd.scrollDisplayRight();
+    // g_lcd.scrollDisplayRight();
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
     //g_lcd.print(temp);
-//    g_lcd.print(frequency);
+    //    g_lcd.print(frequency);
 
     // If volume changed, set
     if (volCount) {
@@ -299,27 +296,21 @@ String stationName(float freq) {
     return stationName;
 }
 
-void volumeFlagUp() {
-  cli();
-    g_volume++;
-            g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON v1");
-    if (g_volume > 18) {
-      g_volume = 18;
-    }
-    g_volChangeState = c_tickDelay;
-    sei();
-}
+void volumeFlag() {
+    g_lcd.setCursor(0, 0);
+    g_lcd.print("BUTTON v1");
 
-void volumeFlagDown() {
-  cli();
-          g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON v2");
-    g_volume--;
-    if (g_volume < 0) {
-        g_volume = 0;
-    }
-    g_volChangeState = c_tickDelay;
-        sei();
+    if (digitalRead(c_reClk) == digitalRead(c_reDat)) {
+        g_volume++;
+        if (g_volume > 18) {
+            g_volume = 18;
+        } else {
+            g_volume--;
+        }
+        if (g_volume < 0) {
+            g_volume = 0;
+        }
 
+        g_volChangeState = c_tickDelay;
+    }
 }
