@@ -304,13 +304,13 @@ void volumeFlag() {
         g_volume++;
         if (g_volume > 18) {
             g_volume = 18;
-        } else {
-            g_volume--;
         }
+    } else {
+        g_volume--;
         if (g_volume < 0) {
             g_volume = 0;
         }
-
-        g_volChangeState = c_tickDelay;
     }
+
+    g_volChangeState = c_tickDelay;
 }
