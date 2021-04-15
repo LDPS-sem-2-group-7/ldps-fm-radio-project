@@ -61,7 +61,7 @@ void setup() {
     Serial.begin(9600); // set baud rate
 
 
-    if (!g_rtc.oscillatorCheck()) {
+    if (g_rtc.oscillatorCheck()) {
         Serial.println("RTC not running, set date and time");
         g_rtc.setDate(26);
         g_rtc.setMonth(03);
