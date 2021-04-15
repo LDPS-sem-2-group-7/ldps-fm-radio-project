@@ -150,8 +150,6 @@ void loop() {
 
     //memory buttons
     if (memButton1State == LOW) {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON m1");
         Serial.print("Button press: memButton1");
         g_radio.setFrequency(c_memFreq1);
         g_current_frequency = c_memFreq1;
@@ -160,8 +158,6 @@ void loop() {
     }
 
     if (memButton2State == LOW) {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON m2");
         Serial.print("Button press: memButton2");
         g_radio.setFrequency(c_memFreq2);
         g_current_frequency = c_memFreq2;
@@ -171,8 +167,6 @@ void loop() {
 
     // frequency change buttons
     if (frequButton1State == LOW) {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON f1");
         Serial.print("Button press: frequButton1State");
         g_current_frequency = g_radio.seek('u');
         if (g_current_frequency > c_maxFreq) {
@@ -184,8 +178,6 @@ void loop() {
     }
 
     if (frequButton2State == LOW) {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print("BUTTON f2");
         Serial.print("Button press: frequButton2State");
         g_current_frequency = g_radio.seek('d');
         if (g_current_frequency > c_minFreq) {
@@ -227,6 +219,16 @@ void loop() {
     }
 }
 
+String PadTwo(String input){
+  String output;
+  if (input.length() == 1) {
+     output =  "0" + input;
+    } else {
+      output = input;
+      }
+  return output;
+}
+
 void printDisplay(float frequency, int volCount, int freqCount) {
     /*
       |2020-13-45 15:00|
@@ -235,9 +237,13 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
     bool a = false;
-    String dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/' + String(g_rtc.getMonth(a)) + '/' + String(g_rtc.getYear());
-    //String temp = String(g_rtc.getTemperature()) + "°C ";
-    //dateTime += temp;
+    String dateTime = String(g_rtc.getHour(a, a)) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + String(g_rtc.getDate()) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
+     //dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|';
+
+    String temperature;
+    temperature = String(g_rtc.getTemperature());
+    temperature.remove(temperature.length() - 3);
+    temperature += "C";
 
     // Write the time string
     //g_lcd.clear();
@@ -259,7 +265,14 @@ void printDisplay(float frequency, int volCount, int freqCount) {
 
     // If frequency changed, and available, display radio station name
     String name = stationName(frequency);
-    name += "                ";
+    int padLen = 13 - name.length();
+    String pad = "";
+    for (int i = 0; i < padLen; i++) {
+      pad += " ";
+    }
+    name += pad;
+    name += temperature;
+    
     g_lcd.setCursor(0, 1);
     g_lcd.print(name);
 }
@@ -281,7 +294,7 @@ String volumeString(int volume) {
 }
 
 String stationName(float freq) {
-    String stationName = String(freq);
+    String stationName = "";
 
     if (freq == 105.8) {
         stationName = "Absolute Radio";
@@ -301,7 +314,10 @@ String stationName(float freq) {
         stationName = "LBC";
     } else if (freq == 105.4) {
         stationName = "Magic";
+    } else {
+      stationName = String(freq) + "Hz";
     }
+
 
     return stationName;
 }
