@@ -52,10 +52,10 @@ void setup() {
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
     pinMode(c_reDat, INPUT); // input pullup used in sims
-    attachInterrupt(0, volumeFlagUp, RISING);
+   // attachInterrupt(0, volumeFlagUp, RISING);
 
     pinMode(c_reClk, INPUT);
-    attachInterrupt(0, volumeFlagDown, RISING);
+    //attachInterrupt(0, volumeFlagDown, RISING);
 
     pinMode(c_reSw, INPUT);
     Serial.begin(9600); // set baud rate
