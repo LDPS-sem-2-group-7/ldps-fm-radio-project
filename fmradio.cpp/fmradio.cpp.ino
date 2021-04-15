@@ -51,11 +51,12 @@ void setup() {
 
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
+    
     pinMode(c_reDat, INPUT); // input pullup used in sims
-   // attachInterrupt(0, volumeFlagUp, RISING);
-
     pinMode(c_reClk, INPUT);
-    //attachInterrupt(0, volumeFlagDown, RISING);
+    
+   attachInterrupt(0, volumeFlagUp, RISING);
+   attachInterrupt(1, volumeFlagDown, RISING);
 
     pinMode(c_reSw, INPUT);
     Serial.begin(9600); // set baud rate
@@ -123,8 +124,9 @@ void loop() {
     //    g_radio.setHardmute(g_muteState); //
     g_radio.setHardmute(false); // TODO: make the mute button work (first)
 
-    // legacy volume control
-    /*if (g_reClkState != g_reLastState) {
+    // volume control
+    /*
+    if (g_reClkState != g_reLastState) {
         Serial.print("RE pulse");
         // pulse occured
         if (g_reDatState != g_reClkState) {
@@ -141,8 +143,8 @@ void loop() {
             g_lcd.print(g_volume);
         }
 
-    }*/
-
+    }
+*/
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
@@ -298,16 +300,19 @@ String stationName(float freq) {
 }
 
 void volumeFlagUp() {
+  cli();
     g_volume++;
             g_lcd.setCursor(0, 0);
         g_lcd.print("BUTTON v1");
     if (g_volume > 18) {
-        g_volume = 18;
+      g_volume = 18;
     }
     g_volChangeState = c_tickDelay;
+    sei();
 }
 
 void volumeFlagDown() {
+  cli();
           g_lcd.setCursor(0, 0);
         g_lcd.print("BUTTON v2");
     g_volume--;
@@ -315,4 +320,6 @@ void volumeFlagDown() {
         g_volume = 0;
     }
     g_volChangeState = c_tickDelay;
+        sei();
+
 }
