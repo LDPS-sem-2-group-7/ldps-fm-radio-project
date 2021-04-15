@@ -123,8 +123,8 @@ void loop() {
     //    g_radio.setHardmute(g_muteState); //
     g_radio.setHardmute(false); // TODO: make the mute button work (first)
 
-    // volume control
-    if (g_reClkState != g_reLastState) {
+    // legacy volume control
+    /*if (g_reClkState != g_reLastState) {
         Serial.print("RE pulse");
         // pulse occured
         if (g_reDatState != g_reClkState) {
@@ -141,7 +141,7 @@ void loop() {
             g_lcd.print(g_volume);
         }
 
-    }
+    }*/
 
     g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
