@@ -228,11 +228,13 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     bool a = false;
     String dateTime = String(g_rtc.getHour(a, a)) + ':' + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/' + String(g_rtc.getMonth(a)) + '/' + String(g_rtc.getYear());
     String temp = String(g_rtc.getTemperature()) + "°C ";
+    dateTime += temp;
 
     // Write the time string
     //g_lcd.clear();
     g_lcd.setCursor(0, 0);
-    //g_lcd.print(dateTime);
+    g_lcd.print("                    ");
+    g_lcd.print(dateTime);
     // g_lcd.scrollDisplayRight();
 
     // Write the frequency string
