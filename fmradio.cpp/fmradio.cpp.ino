@@ -11,7 +11,9 @@ int g_reClkState = 0;
 int g_reDatState = 0;
 int g_reLastState = 0;
 int g_reSwState = 0;
-int g_volume = 5;
+volatile int g_volume = 5;
+volatile byte g_volUpFlag = 0;
+volatile byte g_volDownFlag = 0;
 int g_day = 0;
 int g_month = 0;
 int g_year = 0;
@@ -55,7 +57,7 @@ void setup() {
     pinMode(c_reDat, INPUT); // input pullup used in sims
     pinMode(c_reClk, INPUT);
 
-    attachInterrupt(0, volumeFlag, RISING);
+    attachInterrupt(0, volumeFlag, FALLING);
 
     pinMode(c_reSw, INPUT);
     Serial.begin(9600); // set baud rate
@@ -109,6 +111,23 @@ void loop() {
     }
 
     printDisplay(g_current_frequency, g_volChangeState, g_freqChangeState);
+
+    if (g_volUpFlag) {
+        g_volume++;
+        if (g_volume > 18) {
+            g_volume = 18;
+        }
+        g_volUpFlag = 0;
+    }
+    
+    if (g_volDownFlag) {
+        g_volume--;
+        if (g_volume < 0) {
+            g_volume = 0;
+        }
+        g_volDownFlag = 0;
+    }
+
 
     //// rotary encoder
     g_reClkState = digitalRead(c_reClk);
@@ -237,7 +256,7 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
     bool a = false;
-    String dateTime = String(PadTwo(g_rtc.getHour(a, a))) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + PadTwo(String(g_rtc.getDate())) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
+    String dateTime = PadTwo(String(g_rtc.getHour(a, a))) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + PadTwo(String(g_rtc.getDate())) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
     //dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|';
 
     String temperature;
@@ -322,19 +341,10 @@ String stationName(float freq) {
 }
 
 void volumeFlag() {
-    g_lcd.setCursor(0, 0);
-    g_lcd.print("BUTTON v1");
-
     if (digitalRead(c_reClk) == digitalRead(c_reDat)) {
-        g_volume++;
-        if (g_volume > 18) {
-            g_volume = 18;
-        }
+        g_volUpFlag = 1;
     } else {
-        g_volume--;
-        if (g_volume < 0) {
-            g_volume = 0;
-        }
+        g_volDownFlag = 1;
     }
 
     g_volChangeState = c_tickDelay;
