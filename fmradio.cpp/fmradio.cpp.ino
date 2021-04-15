@@ -233,7 +233,6 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     // Write the time string
     //g_lcd.clear();
     g_lcd.setCursor(0, 0);
-    g_lcd.print("                    ");
     g_lcd.print(dateTime);
     // g_lcd.scrollDisplayRight();
 
