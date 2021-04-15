@@ -3,6 +3,7 @@
 #include <Wire.h>
 #include <string.h>
 #include "constants.h"
+#include "byteArrays.h"
 #include "DS3231.h"
 #include "stdlib.h"
 
@@ -44,12 +45,12 @@ void setup() {
     // intialise the lcd
     Serial.print("Initialise lcd object");
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
-    g_lcd.createChar(0,zero);
-    g_lcd.createChar(1,one);
-    g_lcd.createChar(2,two);
-    g_lcd.createChar(3,three);
-    g_lcd.createChar(4,four);
-    g_lcd.createChar(5,five);
+    g_lcd.createChar(0, zero);
+    g_lcd.createChar(1, one);
+    g_lcd.createChar(2, two);
+    g_lcd.createChar(3, three);
+    g_lcd.createChar(4, four);
+    g_lcd.createChar(5, five);
     g_lcd.backlight();
 
     // intialise the rtc
@@ -78,7 +79,6 @@ void setup() {
         g_rtc.setMinute(30);
         g_rtc.setSecond(00);
     }
-
 }
 
 void loop() {
@@ -144,12 +144,12 @@ void loop() {
     // mute switch
     if (g_reSwState == LOW) {
         if (g_muteState) {
-        g_muteState = false;
+            g_muteState = false;
         } else {
-        g_muteState = true;
+            g_muteState = true;
         }
         g_volChangeState = c_tickDelay;
-            g_radio.setHardmute(g_muteState);
+        g_radio.setHardmute(g_muteState);
         delay(50);
     }
     g_radio.setHardmute(g_muteState);
@@ -277,31 +277,13 @@ void printDisplay(float frequency, int volCount, int freqCount) {
 
     // Write the time string
     //g_lcd.clear();
-    g_lcd.setCursor(0, 0);
-    g_lcd.print(dateTime);
+
     //g_lcd.scrollDisplayRight();
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
     //g_lcd.print(temp);
     //    g_lcd.print(frequency);
-
-    // If volume changed, set
-    if (volCount) {
-        String vStr = volumeString(g_volume);
-        g_lcd.setCursor(0, 1);
-        double factor = 16/80;
-        int percent = (g_volume+1)/factor;
-        int number = percent/5;
-        int remainder = percent%5;
-        if(number > 0){
-          lcd.setCursor(number-1,1);
-          lcd.write(5);
-        }
-        lcd.setCursor(number,1)
-        lcd.write(remainder);
-        // g_lcd.print(name);
-    }
 
     // If frequency changed, and available, display radio station name
     String name = stationName(frequency);
@@ -314,14 +296,44 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     name += temperature;
 
 
-   String volString = volumeString(g_volume);
-   if (g_volChangeState > 0) {
-     g_lcd.setCursor(0, 1);
-    g_lcd.print(volString);
-    } else {
+    String volString = volumeString(g_volume);
+    if (g_volChangeState > 0) {
+        g_lcd.setCursor(0, 0);
+        g_lcd.print("Volume:            ");
 
-    g_lcd.setCursor(0, 1);
-    g_lcd.print(name);
+        if (g_muteState) {
+           g_lcd.setCursor(0, 1);
+           g_lcd.print("MUTED               ");
+           return;
+        }
+
+        String vStr = volumeString(g_volume);
+        g_lcd.setCursor(0, 1);
+        double factor = 16 / 80.0;
+        int percent = (g_volume + 1) / factor;
+        int number = percent / 5;
+        int remainder = percent % 5;
+
+        for (int i = 0; i < 17; i++) {
+            if (number < 0) {
+                break;
+            }
+            if (i < number) {
+                g_lcd.setCursor(i - 1, 1);
+                g_lcd.write(5);
+            } else {
+                g_lcd.setCursor(i - 1, 1);
+                g_lcd.write(0);
+            }
+        }
+
+        g_lcd.setCursor(number, 1);
+        g_lcd.write(remainder);
+    } else {
+        g_lcd.setCursor(0, 0);
+        g_lcd.print(dateTime);
+        g_lcd.setCursor(0, 1);
+        g_lcd.print(name);
     }
 }
 
@@ -373,9 +385,9 @@ String stationName(float freq) {
 
 void volumeFlag() {
     if (digitalRead(c_reClk) == digitalRead(c_reDat)) {
-        g_volUpFlag = 1;
-    } else {
         g_volDownFlag = 1;
+    } else {
+        g_volUpFlag = 1;
     }
 
     g_volChangeState = c_tickDelay;

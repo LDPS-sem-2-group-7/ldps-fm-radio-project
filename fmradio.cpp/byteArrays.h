@@ -1,7 +1,8 @@
 #ifndef byteArrays_h
 #define byteArrays_h
 
-byte zero[] = {<br>  B00000,
+byte zero[] = {
+  B00000,
   B00000,
   B00000,
   B00000,
