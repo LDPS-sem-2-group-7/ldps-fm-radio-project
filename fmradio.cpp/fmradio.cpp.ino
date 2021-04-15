@@ -136,12 +136,16 @@ void loop() {
 
     // mute switch
     if (g_reSwState == LOW) {
-        g_muteState = true;
-    } else {
+        if (g_muteState) {
         g_muteState = false;
+        } else {
+        g_muteState = true;
+        }
+        g_volChangeState = c_tickDelay;
+            g_radio.setHardmute(g_muteState);
+        delay(50);
     }
-    //    g_radio.setHardmute(g_muteState); //
-    g_radio.setHardmute(false); // TODO: make the mute button work (first)
+    g_radio.setHardmute(g_muteState);
 
     // volume control
     /*
@@ -308,11 +312,15 @@ String volumeString(int volume) {
     int count = volume * (16 / 18); // sets number of bars to complete
 
     // create the string
-    String out_string = String(count, "+") + "                      ";
-//"█"
+    String out_string = "";
+    for (int i = 0; i < volume; i++) {
+        out_string += "=";
+    } 
+    out_string += "                  ";
+
     // check if muted
     if (g_muteState) {
-        out_string = "MUTED";
+        out_string = "MUTED               ";
     }
 
     return out_string;
