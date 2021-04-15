@@ -61,7 +61,7 @@ void setup() {
     Serial.begin(9600); // set baud rate
 
 
-    if (g_rtc.oscillatorCheck()) {
+    if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC not running, set date and time");
         g_rtc.setDate(26);
         g_rtc.setMonth(03);
@@ -84,8 +84,11 @@ void loop() {
     pinMode(c_memButton2Pin, INPUT_PULLUP);
     pinMode(c_frequButton1Pin, INPUT_PULLUP);
     pinMode(c_frequButton2Pin, INPUT_PULLUP);
+    pinMode(c_timeHour, INPUT_PULLUP);
+    pinMode(c_timeMin, INPUT_PULLUP);
 
 
+    delay(20);
 
     // volume and freq change state.
     if (g_volChangeState > 0) {
@@ -194,6 +197,9 @@ void loop() {
     }
 
     if (g_timeHourButtonState == LOW) {
+              g_lcd.setCursor(0, 0);
+
+      g_lcd.print("BUTTON t1");
         Serial.print("Button press: g_timeHourButtonState");
 
         g_hour++;
@@ -206,6 +212,9 @@ void loop() {
     }
 
     if (g_timeMinButtonState == LOW) {
+              g_lcd.setCursor(0, 0);
+
+      g_lcd.print("BUTTON t2");
         Serial.print("Button press: g_timeMinButtonState");
 
         g_minute++;
@@ -226,15 +235,15 @@ void printDisplay(float frequency, int volCount, int freqCount) {
       |97.8HZ - EAGLE R| >>> | ADIO
     */
     bool a = false;
-    String dateTime = String(g_rtc.getHour(a, a)) + ':' + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/' + String(g_rtc.getMonth(a)) + '/' + String(g_rtc.getYear());
-    String temp = String(g_rtc.getTemperature()) + "°C ";
-    dateTime += temp;
+    String dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|' + String(g_rtc.getDate()) + '/' + String(g_rtc.getMonth(a)) + '/' + String(g_rtc.getYear());
+    //String temp = String(g_rtc.getTemperature()) + "°C ";
+    //dateTime += temp;
 
     // Write the time string
     //g_lcd.clear();
     g_lcd.setCursor(0, 0);
     g_lcd.print(dateTime);
-    // g_lcd.scrollDisplayRight();
+    //g_lcd.scrollDisplayRight();
 
     // Write the frequency string
     g_lcd.setCursor(0, 1);
