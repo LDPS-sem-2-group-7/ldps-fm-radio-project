@@ -135,7 +135,7 @@ void loop() {
     g_reSwState = digitalRead(c_reSw);
 
     // mute switch
-    if (g_reSwState == HIGH) {
+    if (g_reSwState == LOW) {
         g_muteState = true;
     } else {
         g_muteState = false;
@@ -292,18 +292,24 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     name += pad;
     name += temperature;
 
+
+   String volString = volumeString(g_volume);
+   if (g_volChangeState > 0) {
+     g_lcd.setCursor(0, 1);
+    g_lcd.print(volString);
+    } else {
+
     g_lcd.setCursor(0, 1);
     g_lcd.print(name);
+    }
 }
 
 String volumeString(int volume) {
-    String out_string;
     int count = volume * (16 / 18); // sets number of bars to complete
 
     // create the string
-    //out_string = String(count, "█") + String(16 - count, " ");
-    out_string = "VOL CHANGED";
-
+    String out_string = String(count, "+") + "                      ";
+//"█"
     // check if muted
     if (g_muteState) {
         out_string = "MUTED";
