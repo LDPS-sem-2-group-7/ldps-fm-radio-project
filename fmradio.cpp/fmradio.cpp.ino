@@ -44,6 +44,12 @@ void setup() {
     // intialise the lcd
     Serial.print("Initialise lcd object");
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+    g_lcd.createChar(0,zero);
+    g_lcd.createChar(1,one);
+    g_lcd.createChar(2,two);
+    g_lcd.createChar(3,three);
+    g_lcd.createChar(4,four);
+    g_lcd.createChar(5,five);
     g_lcd.backlight();
 
     // intialise the rtc
@@ -72,6 +78,7 @@ void setup() {
         g_rtc.setMinute(30);
         g_rtc.setSecond(00);
     }
+
 }
 
 void loop() {
@@ -119,7 +126,7 @@ void loop() {
         }
         g_volUpFlag = 0;
     }
-    
+
     if (g_volDownFlag) {
         g_volume--;
         if (g_volume < 0) {
@@ -283,6 +290,16 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     if (volCount) {
         String vStr = volumeString(g_volume);
         g_lcd.setCursor(0, 1);
+        double factor = 16/80;
+        int percent = (g_volume+1)/factor;
+        int number = percent/5;
+        int remainder = percent%5;
+        if(number > 0){
+          lcd.setCursor(number-1,1);
+          lcd.write(5);
+        }
+        lcd.setCursor(number,1)
+        lcd.write(remainder);
         // g_lcd.print(name);
     }
 
@@ -315,7 +332,7 @@ String volumeString(int volume) {
     String out_string = "";
     for (int i = 0; i < volume; i++) {
         out_string += "=";
-    } 
+    }
     out_string += "                  ";
 
     // check if muted
