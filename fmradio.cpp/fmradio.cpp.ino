@@ -12,9 +12,6 @@ int g_reSwState = 0;
 volatile int g_volume = 5;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
-int g_day = 0;
-int g_month = 0;
-int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
 int g_volChangeState = 0;
@@ -27,7 +24,6 @@ LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen
 DS3231 g_rtc = DS3231(); // no pins passed
 
 void setup() {
-    Serial.print("Being initialisation");
     Wire.begin(); // basic arduino library to read connections
 
     // set the frequency
@@ -39,7 +35,6 @@ void setup() {
     g_radio.setVolume(10);
 
     // intialise the lcd
-    Serial.print("Initialise lcd object");
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
     g_lcd.createChar(0, zero);
     g_lcd.createChar(1, one);
@@ -50,24 +45,25 @@ void setup() {
     g_lcd.backlight();
 
     // intialise the rtc
-    Serial.print("Initialise rtc");
     DS3231 g_rtc = DS3231(); // no pins passed
     g_lcd.clear();
 
-    // initialise the rotary encoder
-    Serial.print("Initialise rotary encoder");
-
+    // set the pin modes for all used pins
     pinMode(c_reDat, INPUT);
     pinMode(c_reClk, INPUT);
+    pinMode(c_reSw, INPUT);
+    pinMode(c_memButton1Pin, INPUT_PULLUP);
+    pinMode(c_memButton2Pin, INPUT_PULLUP);
+    pinMode(c_frequButton1Pin, INPUT_PULLUP);
+    pinMode(c_frequButton2Pin, INPUT_PULLUP);
+    pinMode(c_timeHour, INPUT_PULLUP);
+    pinMode(c_timeMin, INPUT_PULLUP);
 
     attachInterrupt(0, volumeFlag, FALLING);
 
-    pinMode(c_reSw, INPUT);
-    Serial.begin(9600); // set baud rate
-
+    Serial.begin(9600);
 
     if (!g_rtc.oscillatorCheck()) {
-        Serial.println("RTC not running, set date and time");
         setDefaultRTC();
     }
 }
@@ -89,14 +85,6 @@ void loop() {
     int frequButton2State = digitalRead(c_frequButton2Pin);
     int g_timeHourButtonState = digitalRead(c_timeHour);
     int g_timeMinButtonState = digitalRead(c_timeMin);
-
-    // TODO: shouldn't this be in the setup? test in labs
-    pinMode(c_memButton1Pin, INPUT_PULLUP);
-    pinMode(c_memButton2Pin, INPUT_PULLUP);
-    pinMode(c_frequButton1Pin, INPUT_PULLUP);
-    pinMode(c_frequButton2Pin, INPUT_PULLUP);
-    pinMode(c_timeHour, INPUT_PULLUP);
-    pinMode(c_timeMin, INPUT_PULLUP);
 
     printDisplay(g_current_frequency, g_volChangeState);
     delay(20); // avoids accidental double presses
@@ -137,16 +125,12 @@ void loop() {
 
 void volUp(){
     g_volume++;
-    if (g_volume > 18) {
-        g_volume = 18;
-    }
+    constrain(g_volume, 0, 18);
 }
 
 void volDown(){
     g_volume--;
-    if (g_volume < 0) {
-        g_volume = 0;
-    }
+    constrain(g_volume, 0, 18);
 }
 
 void buttonMute() {
@@ -168,6 +152,7 @@ void buttonFreqMem2() {
 
 void buttonFreqUp() {
     g_current_frequency = g_radio.seek('u');
+    // TODO: verify if this logic works
     if (g_current_frequency > c_maxFreq) {
         g_current_frequency = c_minFreq;
     }
@@ -187,7 +172,6 @@ void buttonTimeHour() {
     if (g_hour == 24) {
         g_hour = 0;
     }
-
     g_rtc.setHour(g_hour);
 }
 
@@ -196,7 +180,6 @@ void buttonTimeMin() {
     if (g_minute == 60) {
         g_minute = 0;
     }
-
     g_rtc.setMinute(g_minute);
 }
 
