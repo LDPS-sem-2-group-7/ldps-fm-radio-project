@@ -8,8 +8,7 @@
 #include "stdlib.h"
 
 // global variables, g_ corresponds to global
-int g_reSwState = 0;
-volatile int g_volume = 5;
+volatile int g_volume = 10;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
 int g_hour = 0;
@@ -26,12 +25,10 @@ void setup() {
     Wire.begin(); // basic arduino library to read connections
 
     // set the frequency
-    Serial.print("Initialise radio object");
     g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1);
-    g_radio.seek('u');
-    g_radio.setVolume(10);
+    g_radio.setVolume(g_volume);
 
     // intialise the lcd
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
@@ -82,8 +79,9 @@ void loop() {
     int memButton2State = digitalRead(c_memButton2Pin);
     int frequButton1State = digitalRead(c_frequButton1Pin);
     int frequButton2State = digitalRead(c_frequButton2Pin);
-    int g_timeHourButtonState = digitalRead(c_timeHour);
-    int g_timeMinButtonState = digitalRead(c_timeMin);
+    int timeHourButtonState = digitalRead(c_timeHour);
+    int timeMinButtonState = digitalRead(c_timeMin);
+    int reSwState = digitalRead(c_reSw);
 
     printDisplay(g_radio.frequency(), g_volChangeState);
     delay(20); // avoids accidental double presses
@@ -98,7 +96,7 @@ void loop() {
         volButtons()
     }
 
-    if (g_reSwState == LOW) {
+    if (reSwState == LOW) {
         buttonMute();
     } else if (memButton1State == LOW) {
         g_radio.setFrequency(c_memFreq1);
@@ -108,9 +106,9 @@ void loop() {
         buttonFreqUp();
     } else if (frequButton2State == LOW) {
         buttonFreqDown();
-    } else if (g_timeHourButtonState == LOW) {
+    } else if (timeHourButtonState == LOW) {
         buttonTimeHour();
-    } else if (g_timeMinButtonState == LOW) {
+    } else if (timeMinButtonState == LOW) {
         buttonTimeMin();
     }
 }
@@ -135,19 +133,24 @@ void buttonMute() {
 }
 
 void buttonFreqUp() {
-    float foundFreq = g_radio.seek('u');
-    // TODO: verify if this logic works
-    if (foundFreq > c_maxFreq) {
-        foundFreq = c_minFreq;
+    float foundFreq;
+    if (g_radio.frequency() == c_maxFreqKnown){
+        foundFreq = c_minFreqKnown;
+    } else {
+        float foundFreq = g_radio.seek('u');
     }
+
     g_radio.setFrequency(foundFreq);
 }
 
 void buttonFreqDown() {
-    float foundFreq = g_radio.seek('d');
-    if (foundFreq < c_minFreq) {
-        foundFreq = c_maxFreq;
+    float foundFreq;
+    if (g_radio.frequency() == c_minFreqKnown){
+        foundFreq = c_maxFreqKnown;
+    } else {
+        float foundFreq = g_radio.seek('d');
     }
+
     g_radio.setFrequency(foundFreq);
 }
 
