@@ -7,12 +7,10 @@
 #include "DS3231.h"
 #include "stdlib.h"
 
-// global variables, g_ corresponds to global
+// global variables, whose state must be preserved across loops
 volatile int g_volume = 10;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
-int g_hour = 0;
-int g_minute = 0;
 int g_volChangeState = 0;
 bool g_muteState = false;
 
@@ -155,19 +153,21 @@ void buttonFreqDown() {
 }
 
 void buttonTimeHour() {
-    g_hour++;
-    if (g_hour == 24) {
-        g_hour = 0;
+    int hourToSet = g_rtc.getHour();
+    hourToSet++;
+    if (hourToSet == 24) {
+        hourToSet = 0;
     }
-    g_rtc.setHour(g_hour);
+    g_rtc.setHour(hourToSet);
 }
 
 void buttonTimeMin() {
-    g_minute++;
-    if (g_minute == 60) {
-        g_minute = 0;
+    int minToSet = g_rtc.getMinute();
+    hourToSet++;
+    if (hourToSet == 60) {
+        hourToSet = 0;
     }
-    g_rtc.setMinute(g_minute);
+    g_rtc.setMinute(hourToSet);
 }
 
 String PadTwo(String input) {
