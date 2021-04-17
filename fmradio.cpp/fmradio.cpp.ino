@@ -69,13 +69,17 @@ void setup() {
 
     if (!g_rtc.oscillatorCheck()) {
         Serial.println("RTC not running, set date and time");
-        g_rtc.setDate(26);
-        g_rtc.setMonth(03);
-        g_rtc.setYear(21);
-        g_rtc.setHour(10);
-        g_rtc.setMinute(30);
-        g_rtc.setSecond(00);
+        setDefaultRTC();
     }
+}
+
+void setDefaultRTC() {
+    g_rtc.setDate(26);
+    g_rtc.setMonth(03);
+    g_rtc.setYear(21);
+    g_rtc.setHour(10);
+    g_rtc.setMinute(30);
+    g_rtc.setSecond(00);
 }
 
 void loop() {
@@ -86,6 +90,8 @@ void loop() {
     int frequButton2State = digitalRead(c_frequButton2Pin);
     int g_timeHourButtonState = digitalRead(c_timeHour);
     int g_timeMinButtonState = digitalRead(c_timeMin);
+
+    // TODO: shouldn't this be in the setup? test in labs
     pinMode(c_memButton1Pin, INPUT_PULLUP);
     pinMode(c_memButton2Pin, INPUT_PULLUP);
     pinMode(c_frequButton1Pin, INPUT_PULLUP);
@@ -134,88 +140,80 @@ void loop() {
 
     // mute switch
     if (g_reSwState == LOW) {
-        if (g_muteState) {
-            g_muteState = false;
-        } else {
-            g_muteState = true;
-        }
-        g_volChangeState = c_tickDelay;
-        g_radio.setHardmute(g_muteState);
-        delay(50);
+        buttonMute();
     }
     g_radio.setHardmute(g_muteState);
 
     g_radio.setVolume(g_volume);
 
-    //memory buttons
     if (memButton1State == LOW) {
-        Serial.print("Button press: memButton1");
-        g_radio.setFrequency(c_memFreq1);
-        g_current_frequency = c_memFreq1;
-        g_freqChangeState = 50;
-        return NULL;
+        buttonFreqMem1();
+    } else if (memButton2State == LOW) {
+        buttonFreqMem2();
+    } else if (frequButton1State == LOW) {
+        buttonFreqUp();
+    } else if (frequButton2State == LOW) {
+        buttonFreqDown();
+    } else if (g_timeHourButtonState == LOW) {
+        buttonTimeHour();
+    } else if (g_timeMinButtonState == LOW) {
+        buttonTimeMin();
+    }
+}
+
+void buttonMute() {
+    g_muteState = !g_muteState;
+    g_radio.setHardmute(g_muteState);
+    g_volChangeState = c_tickDelay;
+    delay(50);
+}
+
+void buttonFreqMem1() {
+    g_radio.setFrequency(c_memFreq1);
+    g_current_frequency = c_memFreq1;
+    g_freqChangeState = 50;
+}
+
+void buttonFreqMem2() {
+    g_radio.setFrequency(c_memFreq2);
+    g_current_frequency = c_memFreq2;
+    g_freqChangeState = 50;
+}
+
+void buttonFreqUp() {
+    g_current_frequency = g_radio.seek('u');
+    if (g_current_frequency > c_maxFreq) {
+        g_current_frequency = c_minFreq;
+    }
+    g_radio.setFrequency(g_current_frequency);
+    g_freqChangeState = c_tickDelay;
+}
+
+void buttonFreqDown() {
+    g_current_frequency = g_radio.seek('d');
+    if (g_current_frequency > c_minFreq) {
+        g_current_frequency = c_maxFreq;
+    }
+    g_radio.setFrequency(g_current_frequency);
+    g_freqChangeState = c_tickDelay;
+}
+
+void buttonTimeHour() {
+    g_hour++;
+    if (g_hour == 24) {
+        g_hour = 0;
     }
 
-    if (memButton2State == LOW) {
-        Serial.print("Button press: memButton2");
-        g_radio.setFrequency(c_memFreq2);
-        g_current_frequency = c_memFreq2;
-        g_freqChangeState = 50;
-        return NULL;
+    g_rtc.setHour(g_hour);
+}
+
+void buttonTimeMin() {
+    g_minute++;
+    if (g_minute == 60) {
+        g_minute = 0;
     }
 
-    // frequency change buttons
-    if (frequButton1State == LOW) {
-        Serial.print("Button press: frequButton1State");
-        g_current_frequency = g_radio.seek('u');
-        if (g_current_frequency > c_maxFreq) {
-            g_current_frequency = c_minFreq;
-        }
-        g_radio.setFrequency(g_current_frequency);
-        g_freqChangeState = c_tickDelay;
-        return NULL;
-    }
-
-    if (frequButton2State == LOW) {
-        Serial.print("Button press: frequButton2State");
-        g_current_frequency = g_radio.seek('d');
-        if (g_current_frequency > c_minFreq) {
-            g_current_frequency = c_maxFreq;
-        }
-        g_radio.setFrequency(g_current_frequency);
-        g_freqChangeState = c_tickDelay;
-        return NULL;
-    }
-
-    if (g_timeHourButtonState == LOW) {
-        g_lcd.setCursor(0, 0);
-
-        g_lcd.print("BUTTON t1");
-        Serial.print("Button press: g_timeHourButtonState");
-
-        g_hour++;
-        if (g_hour == 24) {
-            g_hour = 0;
-        }
-
-        g_rtc.setHour(g_hour);
-        return NULL;
-    }
-
-    if (g_timeMinButtonState == LOW) {
-        g_lcd.setCursor(0, 0);
-
-        g_lcd.print("BUTTON t2");
-        Serial.print("Button press: g_timeMinButtonState");
-
-        g_minute++;
-        if (g_minute == 60) {
-            g_minute = 0;
-        }
-
-        g_rtc.setMinute(g_minute);
-        return NULL;
-    }
+    g_rtc.setMinute(g_minute);
 }
 
 String PadTwo(String input) {
@@ -228,31 +226,16 @@ String PadTwo(String input) {
     return output;
 }
 
-String getDateTimeStr() {
-    /*Returns a datetime string formatted to fill the entire line*/
-    bool falseVar = false; // we need to pass parameters by reference
-    String dateTime = "";
-    dateTime += PadTwo(String(g_rtc.getHour(falseVar, falseVar)));
-    dateTime += ":" ;
-    dateTime += PadTwo(String(g_rtc.getMinute()));
-    dateTime += '|';
-    dateTime += PadTwo(String(g_rtc.getDate()));
-    dateTime += '/';
-    dateTime += PadTwo(String(g_rtc.getMonth(falseVar)));
-    dateTime += "/20";
-    dateTime += String(g_rtc.getYear());
-    return dateTime;
+void printDisplay(float frequency, int volCount, int freqCount) {
+    // if we're printing the volume change we don't need anything else
+    if (g_volChangeState > 0) {
+        printVolume();
+    } else {
+        printTimeAndFreq(frequency, volCount, freqCount);
+    }
 }
 
-String getTempStr() {
-    String temperature;
-    temperature = String(g_rtc.getTemperature());
-    temperature.remove(temperature.length() - 3); // remove decimals
-    temperature += "C";
-    return temperature;
-}
-
-Void print_volume(){
+Void printVolume() {
     g_lcd.setCursor(0, 0);
     g_lcd.print(padRight("Volume:"));
 
@@ -284,17 +267,33 @@ Void print_volume(){
 
     g_lcd.setCursor(number, 1);
     g_lcd.write(remainder);
-
 }
 
-void printDisplay(float frequency, int volCount, int freqCount) {
+String getDateTimeStr() {
+    /*Returns a datetime string formatted to fill the entire line*/
+    bool falseVar = false; // we need to pass parameters by reference
+    String dateTime = "";
+    dateTime += PadTwo(String(g_rtc.getHour(falseVar, falseVar)));
+    dateTime += ":";
+    dateTime += PadTwo(String(g_rtc.getMinute()));
+    dateTime += '|';
+    dateTime += PadTwo(String(g_rtc.getDate()));
+    dateTime += '/';
+    dateTime += PadTwo(String(g_rtc.getMonth(falseVar)));
+    dateTime += "/20";
+    dateTime += String(g_rtc.getYear());
+    return dateTime;
+}
 
-    // if we're printing the volume change we don't need anything else
-    if (g_volChangeState > 0) {
-         print_volume();
-         return;
-    }
+String getTempStr() {
+    String temperature;
+    temperature = String(g_rtc.getTemperature());
+    temperature.remove(temperature.length() - 3); // remove decimals
+    temperature += "C";
+    return temperature;
+}
 
+void printTimeAndFreq(float frequency, int volCount, int freqCount) {
     // get the components for the display
     String dateTime = getDateTimeStr();
     String temperature = getTempStr();
@@ -314,25 +313,6 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     g_lcd.print(dateTime);
     g_lcd.setCursor(0, 1);
     g_lcd.print(line2);
-}
-
-
-String volumeString(int volume) {
-    int count = volume * (c_lcdLen / 18); // sets number of bars to complete
-
-    // create the string
-    String out_string = "";
-    for (int i = 0; i < volume; i++) {
-        out_string += "=";
-    }
-    out_string += "                  ";
-
-    // check if muted
-    if (g_muteState) {
-        out_string = "MUTED               ";
-    }
-
-    return out_string;
 }
 
 String padRight(String input) {
