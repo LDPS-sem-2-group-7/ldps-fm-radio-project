@@ -8,10 +8,10 @@
 #include "stdlib.h"
 
 // global variables, whose state must be preserved across loops
-volatile int g_volume = 10;
+volatile int g_volume = c_defaultVolume;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
-int g_volChangeState = 0;
+int g_volChangeTick = 0;
 bool g_muteState = false;
 
 // global objects, intialised here
@@ -53,16 +53,23 @@ void setup() {
     pinMode(c_timeHour, INPUT_PULLUP);
     pinMode(c_timeMin, INPUT_PULLUP);
 
+    // attach the interupt to pin 2 and to the volumeFlag ISR
     attachInterrupt(0, volumeFlag, FALLING);
 
     Serial.begin(9600);
 
+    // if the RTC has not been used yet, set the default RTC parameters
     if (!g_rtc.oscillatorCheck()) {
         setDefaultRTC();
     }
 }
 
 void setDefaultRTC() {
+    /*
+     * This is run whenever the RTC has not been initialised. The date _can't_
+     * be adjusted after it's been set, so it needs to be hard coded. the time
+     * can be adjusted.
+     */
     g_rtc.setDate(26);
     g_rtc.setMonth(03);
     g_rtc.setYear(21);
@@ -72,6 +79,7 @@ void setDefaultRTC() {
 }
 
 void loop() {
+
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
     int memButton2State = digitalRead(c_memButton2Pin);
@@ -81,13 +89,13 @@ void loop() {
     int timeMinButtonState = digitalRead(c_timeMin);
     int reSwState = digitalRead(c_reSw);
 
-    printDisplay(g_radio.frequency(), g_volChangeState);
+    printDisplay(g_radio.frequency(), g_volChangeTick);
     delay(20); // avoids accidental double presses
 
     // volume and freq change state.
-    // TODO: test if constrain(g_volChangeState--, 0, c_tickDelay) works
-    if (g_volChangeState > 0) {
-        g_volChangeState--;
+    // TODO: test if constrain(g_volChangeTick--, 0, c_tickDelay) works
+    if (g_volChangeTick > 0) {
+        g_volChangeTick--;
     }
 
     if (g_volUpFlag || g_volDownFlag) {
@@ -112,6 +120,11 @@ void loop() {
 }
 
 void volButtons() {
+    /*
+     * This function handles both increases and decreases in volumes. When
+     * called it reads the volume flags (set in the ISR when an interupt is
+     * detected. The volume is constrained into the limits.
+     */
     if (g_volUpFlag) {
         g_volume++;
         g_volUpFlag = 0;
@@ -119,18 +132,22 @@ void volButtons() {
         g_volume--;
         g_volDownFlag = 0;
     }
-    constrain(g_volume, 0, 18);
+    constrain(g_volume, c_minVolume, c_maxVolume);
     g_radio.setVolume(g_volume);
+    g_volChangeTick = c_tickDelay
 }
 
 void buttonMute() {
     g_muteState = !g_muteState;
-    g_volChangeState = c_tickDelay;
     g_radio.setHardmute(g_muteState);
-    delay(50);
+    delay(50); // the mute button double clicks a lot
+    g_volChangeTick = c_tickDelay;
 }
 
 void buttonFreqUp() {
+    /*
+     * Increases the volume and rolls to the minimum when required to do so.
+     */
     float foundFreq;
     if (g_radio.frequency() == c_maxFreqKnown){
         foundFreq = c_minFreqKnown;
@@ -142,6 +159,9 @@ void buttonFreqUp() {
 }
 
 void buttonFreqDown() {
+    /*
+     * Decreases the volume and rolls to the maximum when required to do so.
+     */
     float foundFreq;
     if (g_radio.frequency() == c_minFreqKnown){
         foundFreq = c_maxFreqKnown;
@@ -171,6 +191,11 @@ void buttonTimeMin() {
 }
 
 String PadTwo(String input) {
+    /*
+     * Expects an input of either 1 or 2 numbers. pads the input with an extra
+     * 0 if it's only 1 char. For example, if the input is '3' the output is
+     * '03'
+     */
     String output;
     if (input.length() == 1) {
         output = "0" + input;
@@ -181,8 +206,11 @@ String PadTwo(String input) {
 }
 
 void printDisplay(float frequency, int volCount, int freqCount) {
+    /*
+     * Calls the appropriate display function
+     */
     // if we're printing the volume change we don't need anything else
-    if (g_volChangeState > 0) {
+    if (g_volChangeTick > 0) {
         printVolume();
     } else {
         printTimeAndFreq(frequency, volCount, freqCount);
@@ -321,5 +349,5 @@ void volumeFlag() {
         g_volUpFlag = 1;
     }
 
-    g_volChangeState = c_tickDelay;
+    g_volChangeTick = c_tickDelay;
 }
