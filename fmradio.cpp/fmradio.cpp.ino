@@ -17,7 +17,6 @@ int g_month = 0;
 int g_year = 0;
 int g_hour = 0;
 int g_minute = 0;
-int g_freqChangeState = 0;
 int g_volChangeState = 0;
 bool g_muteState = false;
 float g_current_frequency = c_memFreq1;
@@ -58,7 +57,7 @@ void setup() {
     // initialise the rotary encoder
     Serial.print("Initialise rotary encoder");
 
-    pinMode(c_reDat, INPUT); // input pullup used in sims
+    pinMode(c_reDat, INPUT);
     pinMode(c_reClk, INPUT);
 
     attachInterrupt(0, volumeFlag, FALLING);
@@ -99,54 +98,25 @@ void loop() {
     pinMode(c_timeHour, INPUT_PULLUP);
     pinMode(c_timeMin, INPUT_PULLUP);
 
-
-    delay(20);
+    printDisplay(g_current_frequency, g_volChangeState);
+    delay(20); // avoids accidental double presses
 
     // volume and freq change state.
     if (g_volChangeState > 0) {
         g_volChangeState--;
     }
 
-    if (g_freqChangeState > 0) {
-        g_freqChangeState--;
-    }
-
-    // if vol and freq changed in quick succession, keep last change
-    if (g_volChangeState && g_freqChangeState) {
-        if (g_volChangeState > g_freqChangeState) {
-            g_freqChangeState = 0;
-        } else {
-            g_volChangeState = 0;
-        }
-    }
-
-    printDisplay(g_current_frequency, g_volChangeState, g_freqChangeState);
-
     if (g_volUpFlag) {
-        g_volume++;
-        if (g_volume > 18) {
-            g_volume = 18;
-        }
+        volUp();
         g_volUpFlag = 0;
-    }
-
-    if (g_volDownFlag) {
-        g_volume--;
-        if (g_volume < 0) {
-            g_volume = 0;
-        }
+    } else if (g_volDownFlag) {
+        volDown();
         g_volDownFlag = 0;
     }
 
-    // mute switch
     if (g_reSwState == LOW) {
         buttonMute();
-    }
-    g_radio.setHardmute(g_muteState);
-
-    g_radio.setVolume(g_volume);
-
-    if (memButton1State == LOW) {
+    } else if (memButton1State == LOW) {
         buttonFreqMem1();
     } else if (memButton2State == LOW) {
         buttonFreqMem2();
@@ -158,6 +128,24 @@ void loop() {
         buttonTimeHour();
     } else if (g_timeMinButtonState == LOW) {
         buttonTimeMin();
+    }
+
+    g_radio.setHardmute(g_muteState);
+    g_radio.setVolume(g_volume);
+
+}
+
+void volUp(){
+    g_volume++;
+    if (g_volume > 18) {
+        g_volume = 18;
+    }
+}
+
+void volDown(){
+    g_volume--;
+    if (g_volume < 0) {
+        g_volume = 0;
     }
 }
 
@@ -171,13 +159,11 @@ void buttonMute() {
 void buttonFreqMem1() {
     g_radio.setFrequency(c_memFreq1);
     g_current_frequency = c_memFreq1;
-    g_freqChangeState = 50;
 }
 
 void buttonFreqMem2() {
     g_radio.setFrequency(c_memFreq2);
     g_current_frequency = c_memFreq2;
-    g_freqChangeState = 50;
 }
 
 void buttonFreqUp() {
@@ -186,7 +172,6 @@ void buttonFreqUp() {
         g_current_frequency = c_minFreq;
     }
     g_radio.setFrequency(g_current_frequency);
-    g_freqChangeState = c_tickDelay;
 }
 
 void buttonFreqDown() {
@@ -195,7 +180,6 @@ void buttonFreqDown() {
         g_current_frequency = c_maxFreq;
     }
     g_radio.setFrequency(g_current_frequency);
-    g_freqChangeState = c_tickDelay;
 }
 
 void buttonTimeHour() {
