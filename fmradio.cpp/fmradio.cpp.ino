@@ -16,7 +16,6 @@ int g_hour = 0;
 int g_minute = 0;
 int g_volChangeState = 0;
 bool g_muteState = false;
-float g_current_frequency = c_memFreq1;
 
 // global objects, intialised here
 AR1010 g_radio;
@@ -86,28 +85,25 @@ void loop() {
     int g_timeHourButtonState = digitalRead(c_timeHour);
     int g_timeMinButtonState = digitalRead(c_timeMin);
 
-    printDisplay(g_current_frequency, g_volChangeState);
+    printDisplay(g_radio.frequency(), g_volChangeState);
     delay(20); // avoids accidental double presses
 
     // volume and freq change state.
+    // TODO: test if constrain(g_volChangeState--, 0, c_tickDelay) works
     if (g_volChangeState > 0) {
         g_volChangeState--;
     }
 
-    if (g_volUpFlag) {
-        volUp();
-        g_volUpFlag = 0;
-    } else if (g_volDownFlag) {
-        volDown();
-        g_volDownFlag = 0;
+    if (g_volUpFlag || g_volDownFlag) {
+        volButtons()
     }
 
     if (g_reSwState == LOW) {
         buttonMute();
     } else if (memButton1State == LOW) {
-        buttonFreqMem1();
+        g_radio.setFrequency(c_memFreq1);
     } else if (memButton2State == LOW) {
-        buttonFreqMem2();
+        g_radio.setFrequency(c_memFreq2);
     } else if (frequButton1State == LOW) {
         buttonFreqUp();
     } else if (frequButton2State == LOW) {
@@ -117,54 +113,42 @@ void loop() {
     } else if (g_timeMinButtonState == LOW) {
         buttonTimeMin();
     }
+}
 
-    g_radio.setHardmute(g_muteState);
+void volButtons() {
+    if (g_volUpFlag) {
+        g_volume++;
+        g_volUpFlag = 0;
+    } else if (g_volDownFlag) {
+        g_volume--;
+        g_volDownFlag = 0;
+    }
+    constrain(g_volume, 0, 18);
     g_radio.setVolume(g_volume);
-
-}
-
-void volUp(){
-    g_volume++;
-    constrain(g_volume, 0, 18);
-}
-
-void volDown(){
-    g_volume--;
-    constrain(g_volume, 0, 18);
 }
 
 void buttonMute() {
     g_muteState = !g_muteState;
-    g_radio.setHardmute(g_muteState);
     g_volChangeState = c_tickDelay;
+    g_radio.setHardmute(g_muteState);
     delay(50);
 }
 
-void buttonFreqMem1() {
-    g_radio.setFrequency(c_memFreq1);
-    g_current_frequency = c_memFreq1;
-}
-
-void buttonFreqMem2() {
-    g_radio.setFrequency(c_memFreq2);
-    g_current_frequency = c_memFreq2;
-}
-
 void buttonFreqUp() {
-    g_current_frequency = g_radio.seek('u');
+    float foundFreq = g_radio.seek('u');
     // TODO: verify if this logic works
-    if (g_current_frequency > c_maxFreq) {
-        g_current_frequency = c_minFreq;
+    if (foundFreq > c_maxFreq) {
+        foundFreq = c_minFreq;
     }
-    g_radio.setFrequency(g_current_frequency);
+    g_radio.setFrequency(foundFreq);
 }
 
 void buttonFreqDown() {
-    g_current_frequency = g_radio.seek('d');
-    if (g_current_frequency > c_minFreq) {
-        g_current_frequency = c_maxFreq;
+    float foundFreq = g_radio.seek('d');
+    if (foundFreq < c_minFreq) {
+        foundFreq = c_maxFreq;
     }
-    g_radio.setFrequency(g_current_frequency);
+    g_radio.setFrequency(foundFreq);
 }
 
 void buttonTimeHour() {
