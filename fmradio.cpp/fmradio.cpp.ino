@@ -8,9 +8,6 @@
 #include "stdlib.h"
 
 // global variables, g_ corresponds to global
-int g_reClkState = 0;
-int g_reDatState = 0;
-int g_reLastState = 0;
 int g_reSwState = 0;
 volatile int g_volume = 5;
 volatile byte g_volUpFlag = 0;
@@ -135,12 +132,6 @@ void loop() {
         g_volDownFlag = 0;
     }
 
-
-    //// rotary encoder
-    g_reClkState = digitalRead(c_reClk);
-    g_reDatState = digitalRead(c_reDat);
-    g_reSwState = digitalRead(c_reSw);
-
     // mute switch
     if (g_reSwState == LOW) {
         if (g_muteState) {
@@ -154,28 +145,6 @@ void loop() {
     }
     g_radio.setHardmute(g_muteState);
 
-    // volume control
-    /*
-    if (g_reClkState != g_reLastState) {
-        Serial.print("RE pulse");
-        // pulse occured
-        if (g_reDatState != g_reClkState) {
-            // clockwise
-            Serial.print("Clockwise turn");
-            g_volume++;
-            g_lcd.setCursor(0,0);
-            g_lcd.print(g_volume);
-        } else {
-            // anticlockwise
-            Serial.print("Anticlockwise turn");
-            g_volume--;
-            g_lcd.setCursor(0,0);
-            g_lcd.print(g_volume);
-        }
-
-    }
-*/
-    g_reLastState = g_reClkState;
     g_radio.setVolume(g_volume);
 
     //memory buttons
@@ -259,86 +228,97 @@ String PadTwo(String input) {
     return output;
 }
 
-void printDisplay(float frequency, int volCount, int freqCount) {
-    /*
-      |2020-13-45 15:00|
-      |█████████       |
-    OR
-      |97.8HZ - EAGLE R| >>> | ADIO
-    */
-    bool a = false;
-    String dateTime = PadTwo(String(g_rtc.getHour(a, a))) + ":" + PadTwo(String(g_rtc.getMinute())) + '|' + PadTwo(String(g_rtc.getDate())) + '/' + PadTwo(String(g_rtc.getMonth(a))) + "/20" + String(g_rtc.getYear());
-    //dateTime = String(g_rtc.getHour(a, a)) + ":" + String(g_rtc.getMinute()) + '|';
-
-    String temperature;
-    temperature = String(g_rtc.getTemperature());
-    temperature.remove(temperature.length() - 3);
-    temperature += "C";
-
-    // Write the time string
-    //g_lcd.clear();
-
-    //g_lcd.scrollDisplayRight();
-
-    // Write the frequency string
-    g_lcd.setCursor(0, 1);
-    //g_lcd.print(temp);
-    //    g_lcd.print(frequency);
-
-    // If frequency changed, and available, display radio station name
-    String name = stationName(frequency);
-    int padLen = 13 - name.length();
-    String pad = "";
-    for (int i = 0; i < padLen; i++) {
-        pad += " ";
-    }
-    name += pad;
-    name += temperature;
-
-
-    String volString = volumeString(g_volume);
-    if (g_volChangeState > 0) {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print("Volume:            ");
-
-        if (g_muteState) {
-           g_lcd.setCursor(0, 1);
-           g_lcd.print("MUTED               ");
-           return;
-        }
-
-        String vStr = volumeString(g_volume);
-        g_lcd.setCursor(0, 1);
-        double factor = 16 / 80.0;
-        int percent = (g_volume + 1) / factor;
-        int number = percent / 5;
-        int remainder = percent % 5;
-
-        for (int i = 0; i < 17; i++) {
-            if (number < 0) {
-                break;
-            }
-            if (i < number) {
-                g_lcd.setCursor(i - 1, 1);
-                g_lcd.write(5);
-            } else {
-                g_lcd.setCursor(i - 1, 1);
-                g_lcd.write(0);
-            }
-        }
-
-        g_lcd.setCursor(number, 1);
-        g_lcd.write(remainder);
-    } else {
-        g_lcd.setCursor(0, 0);
-        g_lcd.print(dateTime);
-        g_lcd.setCursor(0, 1);
-        g_lcd.print(name);
-    }
+String getDateTimeStr() {
+    /*Returns a datetime string formatted to fill the entire line*/
+    bool falseVar = false; // we need to pass parameters by reference
+    String dateTime = "";
+    dateTime += PadTwo(String(g_rtc.getHour(falseVar, falseVar)));
+    dateTime += ":" ;
+    dateTime += PadTwo(String(g_rtc.getMinute()));
+    dateTime += '|';
+    dateTime += PadTwo(String(g_rtc.getDate()));
+    dateTime += '/';
+    dateTime += PadTwo(String(g_rtc.getMonth(falseVar)));
+    dateTime += "/20";
+    dateTime += String(g_rtc.getYear());
+    return dateTime;
 }
 
+String getTempStr() {
+    String temperature;
+    temperature = String(g_rtc.getTemperature());
+    temperature.remove(temperature.length() - 3); // remove decimals
+    temperature += "C";
+    return temperature;
+}
+
+Void print_volume(){
+    g_lcd.setCursor(0, 0);
+    g_lcd.print(padRight("Volume:"));
+
+    if (g_muteState) {
+        g_lcd.setCursor(0, 1);
+        g_lcd.print(padRight("MUTED"));
+        return;
+    }
+
+    String vStr = volumeString(g_volume);
+    g_lcd.setCursor(0, 1);
+    double factor = c_lcdLen / 80.0; // 80 is c_lcdLen * the 5 blocks
+    int percent = (g_volume + 1) / factor;
+    int number = percent / 5;
+    int remainder = percent % 5;
+
+    for (int i = 0; i < 17; i++) {
+        if (number < 0) {
+            break;
+        }
+        if (i < number) {
+            g_lcd.setCursor(i - 1, 1);
+            g_lcd.write(5);
+        } else {
+            g_lcd.setCursor(i - 1, 1);
+            g_lcd.write(0);
+        }
+    }
+
+    g_lcd.setCursor(number, 1);
+    g_lcd.write(remainder);
+
+}
+
+void printDisplay(float frequency, int volCount, int freqCount) {
+
+    // if we're printing the volume change we don't need anything else
+    if (g_volChangeState > 0) {
+         print_volume();
+         return;
+    }
+
+    // get the components for the display
+    String dateTime = getDateTimeStr();
+    String temperature = getTempStr();
+    String stationName = stationName(frequency);
+
+    // work out the string for line 2
+    int line2padLen = (c_lcdLen - 3) - stationName.length();
+    String line2pad = "";
+    for (int i = 0; i < line2padLen; i++) {
+        line2pad += " ";
+    }
+
+    String line2 = stationName + line2pad + temperature;
+
+    //  print to the LCD
+    g_lcd.setCursor(0, 0);
+    g_lcd.print(dateTime);
+    g_lcd.setCursor(0, 1);
+    g_lcd.print(line2);
+}
+
+
 String volumeString(int volume) {
-    int count = volume * (16 / 18); // sets number of bars to complete
+    int count = volume * (c_lcdLen / 18); // sets number of bars to complete
 
     // create the string
     String out_string = "";
@@ -353,6 +333,22 @@ String volumeString(int volume) {
     }
 
     return out_string;
+}
+
+String padRight(String input) {
+    /* Pads the right part of the input string with spaces, and returns it.
+
+    When printing to the LCD, the cursor is reset and text is written from that
+    point on. If text has already been printed at position n and the new text
+    being written does not extend to position n (i.e. it is shorter), the
+    previous text will remain on the display. One option is to clear the display
+    every time we print the text, but this causes flickering. Instead we can pad
+    the text with spaces and force an overwrite of the previous text.
+
+    Calling this function with an empty input will return a string of just 16
+    spaces.
+    */
+    return input + "                "; // 16 spaces as that's the max
 }
 
 String stationName(float freq) {
@@ -384,6 +380,7 @@ String stationName(float freq) {
 }
 
 void volumeFlag() {
+    /* This is the ISR attached to the rotary encoder interupt*/
     if (digitalRead(c_reClk) == digitalRead(c_reDat)) {
         g_volDownFlag = 1;
     } else {
