@@ -13,6 +13,7 @@ volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
 int g_volChangeTick = 0;
 bool g_muteState = false;
+float g_curFreq = c_memFreq1;
 
 // global objects, intialised here
 AR1010 g_radio;
@@ -25,7 +26,7 @@ void setup() {
     // set the frequency
     g_radio = AR1010();
     g_radio.initialise();
-    g_radio.setFrequency(c_memFreq1);
+    g_radio.setFrequency(g_curFreq);
     g_radio.setVolume(g_volume);
 
     // intialise the lcd
@@ -89,7 +90,7 @@ void loop() {
     int timeMinButtonState = digitalRead(c_timeMin);
     int reSwState = digitalRead(c_reSw);
 
-    printDisplay(g_radio.frequency(), g_volChangeTick);
+    printDisplay(g_curFreq, g_volChangeTick);
     delay(20); // avoids accidental double presses
 
     // volume and freq change state.
@@ -106,8 +107,10 @@ void loop() {
         buttonMute();
     } else if (memButton1State == LOW) {
         g_radio.setFrequency(c_memFreq1);
+        g_curFreq = c_memFreq1;
     } else if (memButton2State == LOW) {
         g_radio.setFrequency(c_memFreq2);
+        g_curFreq = c_memFreq2;
     } else if (frequButton1State == LOW) {
         buttonFreqUp();
     } else if (frequButton2State == LOW) {
@@ -148,28 +151,22 @@ void buttonFreqUp() {
     /*
      * Increases the volume and rolls to the minimum when required to do so.
      */
-    float foundFreq;
-    if (g_radio.frequency() == c_maxFreqKnown){
-        foundFreq = c_minFreqKnown;
-    } else {
-        float foundFreq = g_radio.seek('u');
-    }
-
-    g_radio.setFrequency(foundFreq);
+     g_curFreq = g_radio.seek('d');
+     if (g_curFreq > c_minFreq) {
+         g_curFreq = c_maxFreq;
+     }
+     g_radio.setFrequency(g_curFreq);
 }
 
 void buttonFreqDown() {
     /*
      * Decreases the volume and rolls to the maximum when required to do so.
      */
-    float foundFreq;
-    if (g_radio.frequency() == c_minFreqKnown){
-        foundFreq = c_maxFreqKnown;
-    } else {
-        float foundFreq = g_radio.seek('d');
-    }
-
-    g_radio.setFrequency(foundFreq);
+     g_curFreq = g_radio.seek('u');
+     if (g_curFreq > c_maxFreq) {
+         g_curFreq = c_minFreq;
+     }
+     g_radio.setFrequency(g_curFreq);
 }
 
 void buttonTimeHour() {
