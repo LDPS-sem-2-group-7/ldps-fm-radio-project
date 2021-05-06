@@ -78,6 +78,7 @@ void setDefaultRTC() {
 }
 
 void loop() {
+    bool buttonPressed = true;
 
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
@@ -91,11 +92,11 @@ void loop() {
     printDisplay(g_radio.frequency() / 10.0, g_volChangeTick);
     delay(20); // avoids accidental double presses
 
-    constrain(g_volChangeTick--, 0, c_tickDelay);
-
     if (g_volUpFlag || g_volDownFlag) {
         volButtons();
-    } else if (reSwState == LOW) {
+    }
+
+    if (reSwState == LOW) {
         buttonMute();
     } else if (memButton1State == LOW) {
         buttonMem1();
@@ -109,6 +110,14 @@ void loop() {
         buttonTimeHour();
     } else if (timeMinButtonState == LOW) {
         buttonTimeMin();
+    } else {
+        buttonPressed = false;
+    }
+
+    if (buttonPressed) {
+        g_volChangeTick = 0;
+    } else {
+        constrain(g_volChangeTick--, 0, c_tickDelay);
     }
 }
 
