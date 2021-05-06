@@ -5,7 +5,7 @@
 #include "constants.h"
 #include "byteArrays.h"
 #include "DS3231.h"
-#include "stdlib.h"
+#include "stdlib.h"//TODO remove
 
 // global variables, whose state must be preserved across loops
 volatile int g_volume = c_defaultVolume;
@@ -100,7 +100,7 @@ void loop() {
     }
 
     if (g_volUpFlag || g_volDownFlag) {
-        volButtons()
+        volButtons();
     }
 
     if (reSwState == LOW) {
@@ -137,7 +137,7 @@ void volButtons() {
     }
     constrain(g_volume, c_minVolume, c_maxVolume);
     g_radio.setVolume(g_volume);
-    g_volChangeTick = c_tickDelay
+    g_volChangeTick = c_tickDelay;
 }
 
 void buttonMute() {
@@ -170,7 +170,8 @@ void buttonFreqDown() {
 }
 
 void buttonTimeHour() {
-    int hourToSet = g_rtc.getHour();
+    bool falseVar = false;
+    int hourToSet = g_rtc.getHour(falseVar, falseVar);
     hourToSet++;
     if (hourToSet == 24) {
         hourToSet = 0;
@@ -180,11 +181,11 @@ void buttonTimeHour() {
 
 void buttonTimeMin() {
     int minToSet = g_rtc.getMinute();
-    hourToSet++;
-    if (hourToSet == 60) {
-        hourToSet = 0;
+    minToSet++;
+    if (minToSet == 60) {
+        minToSet = 0;
     }
-    g_rtc.setMinute(hourToSet);
+    g_rtc.setMinute(minToSet);
 }
 
 String PadTwo(String input) {
@@ -202,7 +203,7 @@ String PadTwo(String input) {
     return output;
 }
 
-void printDisplay(float frequency, int volCount, int freqCount) {
+void printDisplay(float frequency, int volCount) {
     /*
      * Calls the appropriate display function
      */
@@ -210,11 +211,11 @@ void printDisplay(float frequency, int volCount, int freqCount) {
     if (g_volChangeTick > 0) {
         printVolume();
     } else {
-        printTimeAndFreq(frequency, volCount, freqCount);
+        printTimeAndFreq(frequency, volCount);
     }
 }
 
-Void printVolume() {
+void printVolume() {
     g_lcd.setCursor(0, 0);
     g_lcd.print(padRight("Volume:"));
 
@@ -224,7 +225,6 @@ Void printVolume() {
         return;
     }
 
-    String vStr = volumeString(g_volume);
     g_lcd.setCursor(0, 1);
     double factor = c_lcdLen / 80.0; // 80 is c_lcdLen * the 5 blocks
     int percent = (g_volume + 1) / factor;
@@ -272,11 +272,11 @@ String getTempStr() {
     return temperature;
 }
 
-void printTimeAndFreq(float frequency, int volCount, int freqCount) {
+void printTimeAndFreq(float frequency, int volCount) {
     // get the components for the display
     String dateTime = getDateTimeStr();
     String temperature = getTempStr();
-    String stationName = stationName(frequency);
+    String stationName = getStationName(frequency);
 
     // work out the string for line 2
     int line2padLen = (c_lcdLen - 3) - stationName.length();
@@ -310,7 +310,7 @@ String padRight(String input) {
     return input + "                "; // 16 spaces as that's the max
 }
 
-String stationName(float freq) {
+String getStationName(float freq) {
     String stationName = "";
 
     if (freq == 105.8) {
