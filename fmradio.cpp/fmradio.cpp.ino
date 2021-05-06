@@ -22,12 +22,13 @@ DS3231 g_rtc = DS3231(); // no pins passed
 
 void setup() {
     Wire.begin(); // basic arduino library to read connections
-
+    
     // set the frequency
     g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(g_curFreq);
     g_radio.setVolume(g_volume);
+    g_radio.seek('u'); // TODO: WHY DO WWE NEED THIS????
 
     // intialise the lcd
     g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
@@ -152,10 +153,8 @@ void buttonFreqUp() {
      * Increases the volume and rolls to the minimum when required to do so.
      */
      g_curFreq = g_radio.seek('d');
-     if (g_curFreq > c_minFreq) {
-         g_curFreq = c_maxFreq;
-     }
      g_radio.setFrequency(g_curFreq);
+     g_curFreq = g_curFreq / 10;
 }
 
 void buttonFreqDown() {
@@ -163,10 +162,8 @@ void buttonFreqDown() {
      * Decreases the volume and rolls to the maximum when required to do so.
      */
      g_curFreq = g_radio.seek('u');
-     if (g_curFreq > c_maxFreq) {
-         g_curFreq = c_minFreq;
-     }
      g_radio.setFrequency(g_curFreq);
+     g_curFreq = g_curFreq / 10;
 }
 
 void buttonTimeHour() {
