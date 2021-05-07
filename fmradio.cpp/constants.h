@@ -1,7 +1,7 @@
 #ifndef constants_h
 #define constants_h
 
-const int c_i2cDataPath = 0x27;
+const int c_i2cAddress = 0x27;
 const float c_minFreq = 88.0;
 const float c_maxFreq = 108.0;
 const float c_minFreqKnown = 88.1;

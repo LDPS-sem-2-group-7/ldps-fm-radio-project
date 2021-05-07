@@ -1,23 +1,23 @@
-#include "ar1010lib.h"
-#include "LiquidCrystal_I2C.h"
 #include <Wire.h>
 #include <string.h>
-#include "constants.h"
+#include "ar1010lib.h"
 #include "byteArrays.h"
+#include "constants.h"
 #include "DS3231.h"
+#include "LiquidCrystal_I2C.h"
 
 // global variables, whose state must be preserved across loops
 volatile int g_volume = c_defaultVolume;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
 int g_volChangeTick = 0;
-int g_freqChangeTick = c_tickDelay;
+int g_freqChangeTick = c_tickDelay; // shows raw freq on startup
 bool g_muteState = false;
 
 // global objects, intialised here
 AR1010 g_radio;
-LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cDataPath, c_lcdHeight, c_lcdLen);
-DS3231 g_rtc = DS3231(); // no pins passed
+LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cAddress, c_lcdHeight, c_lcdLen);
+DS3231 g_rtc = DS3231();
 
 void setup() {
     Wire.begin(); // basic arduino library to read connections
@@ -29,7 +29,7 @@ void setup() {
     g_radio.setVolume(g_volume);
 
     // intialise the lcd
-    g_lcd.begin(c_i2cDataPath, c_lcdHeight, c_lcdLen);
+    g_lcd.begin(c_i2cAddress, c_lcdHeight, c_lcdLen);
     g_lcd.createChar(0, zero);
     g_lcd.createChar(1, one);
     g_lcd.createChar(2, two);
@@ -40,7 +40,6 @@ void setup() {
 
     // intialise the rtc
     DS3231 g_rtc = DS3231(); // no pins passed
-    g_lcd.clear();
 
     // set the pin modes for all used pins
     pinMode(c_reDat, INPUT);
@@ -55,8 +54,6 @@ void setup() {
 
     // attach the interupt to pin 2 and to the volumeFlag ISR
     attachInterrupt(0, volumeFlag, FALLING);
-
-    Serial.begin(9600);
 
     // if the RTC has not been used yet, set the default RTC parameters
     if (!g_rtc.oscillatorCheck()) {
@@ -81,7 +78,7 @@ void setDefaultRTC() {
 }
 
 void loop() {
-    bool buttonPressed = true;
+    bool buttonPressed = true; //overwwrites vol ticker if btn pressed
 
     // read button states
     int memButton1State = digitalRead(c_memButton1Pin);
@@ -96,6 +93,7 @@ void loop() {
     delay(20); // avoids accidental double presses
 
     if (g_volUpFlag || g_volDownFlag) {
+      // seperate because if part of main if/then we reset ticker to 0
         volButtons();
     }
 
@@ -118,16 +116,16 @@ void loop() {
     }
 
     if (buttonPressed) {
+        // reset vol ticker on button press
         g_volChangeTick = 0;
     } else {
+        // decrement/constrain vol ticker if no button is pressed
         g_volChangeTick--;
         g_volChangeTick = constrain(g_volChangeTick, 0, c_tickDelay);
     }
+    
     g_freqChangeTick--;
     g_freqChangeTick = constrain(g_freqChangeTick, 0, c_tickDelay);
-//    g_freqChangeTick++;
-//    if (g_freqChangeTick < 0){
-//      g_freqChangeTick = 0;}
 
 }
 
