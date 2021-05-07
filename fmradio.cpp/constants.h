@@ -27,7 +27,7 @@ const int c_lcdHeight = 2;
 const int c_minVolume = 0;
 const int c_maxVolume = 18;
 const int c_defaultVolume = 10;
-const int c_tickDelay = 40;
+const int c_tickDelay = 13;
 
 
 #endif

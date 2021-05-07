@@ -63,7 +63,7 @@ void setup() {
         setDefaultRTC();
     }
 
-    buttonMem1();
+   buttonMem1(); //TODO: this fixes static but hwy
 }
 
 void setDefaultRTC() {
@@ -92,7 +92,7 @@ void loop() {
     int timeMinButtonState = digitalRead(c_timeMin);
     int reSwState = digitalRead(c_reSw);
 
-    printDisplay(g_radio.frequency() / 10.0, g_volChangeTick, g_volChangeTick);
+    printDisplay(g_radio.frequency() / 10.0, g_volChangeTick, g_freqChangeTick);
     delay(20); // avoids accidental double presses
 
     if (g_volUpFlag || g_volDownFlag) {
@@ -125,7 +125,6 @@ void loop() {
     }
     g_freqChangeTick--;
     g_freqChangeTick = constrain(g_freqChangeTick, 0, c_tickDelay);
-    g_freqChangeTick = 40;
 //    g_freqChangeTick++;
 //    if (g_freqChangeTick < 0){
 //      g_freqChangeTick = 0;}
@@ -327,33 +326,31 @@ String padRight(String input) {
 String getStationName(float freq, int freqCount) {
     String stationName = String(freq) + "Hz";;
 
-//    stationName = String(freqCount);
-//    if (freqCount>0) {
-//        return stationName;
-//    }
-//    
-//    if (freq == 105.8) {
-//        stationName = "Absolute";
-//    } else if (97.1 <= freq && freq <= 99.7) {
-//        stationName = "BBC Radio 1";
-//    } else if (88.1 <= freq && freq <= 90.2) {
-//        stationName = "BBC Radio 2";
-//    } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
-//        stationName = "BBC Radio 3";
-//    } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
-//        stationName = "BBC Radio 4";
-//    } else if (99.9 <= freq && freq <= 101.9) {
-//        stationName = "Classic FM";
-//    } else if (freq == 100.0) {
-//        stationName = "Kiss";
-//    } else if (freq == 97.3) {
-//        stationName = "LBC";
-//    } else if (freq == 105.4) {
-//        stationName = "Magic";
-//    } else if (freq == 96.4) {
-//        stationName = "Eagle Radio";
-//    }
-    stationName = "c: " + String(freqCount);
+    if (freqCount>0) {
+        return stationName;
+    }
+    
+    if (freq == 105.8) {
+        stationName = "Absolute";
+    } else if (97.1 <= freq && freq <= 99.7) {
+        stationName = "BBC Radio 1";
+    } else if (88.1 <= freq && freq <= 90.2) {
+        stationName = "BBC Radio 2";
+    } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
+        stationName = "BBC Radio 3";
+    } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
+        stationName = "BBC Radio 4";
+    } else if (99.9 <= freq && freq <= 101.9) {
+        stationName = "Classic FM";
+    } else if (freq == 100.0) {
+        stationName = "Kiss";
+    } else if (freq == 97.3) {
+        stationName = "LBC";
+    } else if (freq == 105.4) {
+        stationName = "Magic";
+    } else if (freq == 96.4) {
+        stationName = "Eagle Radio";
+    }
 
     return stationName;
 }
