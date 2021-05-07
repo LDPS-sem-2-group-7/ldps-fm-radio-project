@@ -11,6 +11,7 @@ volatile int g_volume = c_defaultVolume;
 volatile byte g_volUpFlag = 0;
 volatile byte g_volDownFlag = 0;
 int g_volChangeTick = 0;
+int g_freqChangeTick = c_tickDelay;
 bool g_muteState = false;
 
 // global objects, intialised here
@@ -61,6 +62,8 @@ void setup() {
     if (!g_rtc.oscillatorCheck()) {
         setDefaultRTC();
     }
+
+    buttonMem1();
 }
 
 void setDefaultRTC() {
@@ -69,11 +72,11 @@ void setDefaultRTC() {
      * be adjusted after it's been set, so it needs to be hard coded. the time
      * can be adjusted.
      */
-    g_rtc.setDate(26);
-    g_rtc.setMonth(03);
+    g_rtc.setDate(06);
+    g_rtc.setMonth(05);
     g_rtc.setYear(21);
-    g_rtc.setHour(10);
-    g_rtc.setMinute(30);
+    g_rtc.setHour(15);
+    g_rtc.setMinute(54);
     g_rtc.setSecond(00);
 }
 
@@ -89,7 +92,7 @@ void loop() {
     int timeMinButtonState = digitalRead(c_timeMin);
     int reSwState = digitalRead(c_reSw);
 
-    printDisplay(g_radio.frequency() / 10.0, g_volChangeTick);
+    printDisplay(g_radio.frequency() / 10.0, g_volChangeTick, g_volChangeTick);
     delay(20); // avoids accidental double presses
 
     if (g_volUpFlag || g_volDownFlag) {
@@ -117,8 +120,16 @@ void loop() {
     if (buttonPressed) {
         g_volChangeTick = 0;
     } else {
-        constrain(g_volChangeTick--, 0, c_tickDelay);
+        g_volChangeTick--;
+        g_volChangeTick = constrain(g_volChangeTick, 0, c_tickDelay);
     }
+    g_freqChangeTick--;
+    g_freqChangeTick = constrain(g_freqChangeTick, 0, c_tickDelay);
+    g_freqChangeTick = 40;
+//    g_freqChangeTick++;
+//    if (g_freqChangeTick < 0){
+//      g_freqChangeTick = 0;}
+
 }
 
 void volButtons() {
@@ -134,7 +145,7 @@ void volButtons() {
         g_volume--;
         g_volDownFlag = 0;
     }
-    constrain(g_volume, c_minVolume, c_maxVolume);
+    g_volume = constrain(g_volume, c_minVolume, c_maxVolume);
     g_radio.setVolume(g_volume);
     g_volChangeTick = c_tickDelay;
 }
@@ -148,10 +159,12 @@ void buttonMute() {
 
 void buttonMem1() {
     g_radio.setFrequency(c_memFreq1 * 10);
+    g_freqChangeTick = c_tickDelay;
 }
 
 void buttonMem2() {
     g_radio.setFrequency(c_memFreq2 * 10);
+    g_freqChangeTick = c_tickDelay;
 }
 
 void buttonFreqUp() {
@@ -159,6 +172,7 @@ void buttonFreqUp() {
      * Increases the volume and rolls to the minimum when required to do so.
      */
      g_radio.setFrequency(g_radio.seek('d'));
+     g_freqChangeTick = c_tickDelay;
 }
 
 void buttonFreqDown() {
@@ -166,6 +180,7 @@ void buttonFreqDown() {
      * Decreases the volume and rolls to the maximum when required to do so.
      */
      g_radio.setFrequency(g_radio.seek('u'));
+     g_freqChangeTick  = c_tickDelay;
 }
 
 void buttonTimeHour() {
@@ -202,7 +217,7 @@ String PadTwo(String input) {
     return output;
 }
 
-void printDisplay(float frequency, int volCount) {
+void printDisplay(float frequency, int volCount, int freqCount) {
     /*
      * Calls the appropriate display function
      */
@@ -210,7 +225,7 @@ void printDisplay(float frequency, int volCount) {
     if (g_volChangeTick > 0) {
         printVolume();
     } else {
-        printTimeAndFreq(frequency, volCount);
+        printTimeAndFreq(frequency, volCount, freqCount);
     }
 }
 
@@ -271,11 +286,11 @@ String getTempStr() {
     return temperature;
 }
 
-void printTimeAndFreq(float frequency, int volCount) {
+void printTimeAndFreq(float frequency, int volCount, int freqCount) {
     // get the components for the display
     String dateTime = getDateTimeStr();
     String temperature = getTempStr();
-    String stationName = getStationName(frequency);
+    String stationName = getStationName(frequency, freqCount);
 
     // work out the string for line 2
     int line2padLen = (c_lcdLen - 3) - stationName.length();
@@ -309,32 +324,36 @@ String padRight(String input) {
     return input + "                "; // 16 spaces as that's the max
 }
 
-String getStationName(float freq) {
-    String stationName = "";
+String getStationName(float freq, int freqCount) {
+    String stationName = String(freq) + "Hz";;
 
-    if (freq == 105.8) {
-        stationName = "Absolute";
-    } else if (97.1 <= freq && freq <= 99.7) {
-        stationName = "BBC Radio 1";
-    } else if (88.1 <= freq && freq <= 90.2) {
-        stationName = "BBC Radio 2";
-    } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
-        stationName = "BBC Radio 3";
-    } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
-        stationName = "BBC Radio 4";
-    } else if (99.9 <= freq && freq <= 101.9) {
-        stationName = "Classic FM";
-    } else if (freq == 100.0) {
-        stationName = "Kiss";
-    } else if (freq == 97.3) {
-        stationName = "LBC";
-    } else if (freq == 105.4) {
-        stationName = "Magic";
-    } else if (freq == 96.4) {
-        stationName = "Eagle Radio";
-    } else {
-        stationName = String(freq) + "Hz";
-    }
+//    stationName = String(freqCount);
+//    if (freqCount>0) {
+//        return stationName;
+//    }
+//    
+//    if (freq == 105.8) {
+//        stationName = "Absolute";
+//    } else if (97.1 <= freq && freq <= 99.7) {
+//        stationName = "BBC Radio 1";
+//    } else if (88.1 <= freq && freq <= 90.2) {
+//        stationName = "BBC Radio 2";
+//    } else if ((90.3 <= freq && freq <= 92.4) || freq == 92.6) {
+//        stationName = "BBC Radio 3";
+//    } else if ((92.5 <= freq && freq <= 96.1) || (103.5 <= freq && freq <= 104.9)) {
+//        stationName = "BBC Radio 4";
+//    } else if (99.9 <= freq && freq <= 101.9) {
+//        stationName = "Classic FM";
+//    } else if (freq == 100.0) {
+//        stationName = "Kiss";
+//    } else if (freq == 97.3) {
+//        stationName = "LBC";
+//    } else if (freq == 105.4) {
+//        stationName = "Magic";
+//    } else if (freq == 96.4) {
+//        stationName = "Eagle Radio";
+//    }
+    stationName = "c: " + String(freqCount);
 
     return stationName;
 }
