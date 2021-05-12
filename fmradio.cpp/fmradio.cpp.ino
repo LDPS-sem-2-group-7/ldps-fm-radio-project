@@ -15,7 +15,7 @@ int g_freqChangeTick = c_tickDelay; // shows raw freq on startup
 bool g_muteState = false;
 
 // global objects, intialised here
-AR1010 g_radio;
+AR1010 g_radio = AR1010();
 LiquidCrystal_I2C g_lcd = LiquidCrystal_I2C(c_i2cAddress, c_lcdHeight, c_lcdLen);
 DS3231 g_rtc = DS3231();
 
@@ -23,7 +23,6 @@ void setup() {
     Wire.begin(); // basic arduino library to read connections
     
     // set the frequency
-    g_radio = AR1010();
     g_radio.initialise();
     g_radio.setFrequency(c_memFreq1 * 10);
     g_radio.setVolume(g_volume);
