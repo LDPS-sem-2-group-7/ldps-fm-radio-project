@@ -6,6 +6,9 @@
 
 ![Main image](img/main-image.png)
 
+This repository contains the files used to create an FM radio using an arduino
+nano and AR1010 module, with an LCD display and RTC timekeeping.
+
 ## Features list
 
 | Section     | Description                                                                                  | Achieved? |
