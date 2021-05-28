@@ -1,37 +1,82 @@
 # ldps-fm-radio-project
-This repository holds all the relevant libraries and files needed to make a FM Radio using an Arduino nano, an Audio Amplifer and a Radio chip.
 
-For our project we are using the AR1010 radio chip, a 16x2 LCD display and a DS3231 RTC module.
+> 2020/21 submission for the second year lab project by team 18 - University of Surrey
+>
+> By Sushant Misra, Awes Mubarak, Sara Pervez, Kareem Rifai, Robert Vasistha
 
-## Features
-The FM radio can do all of the following:
-  * Play music from radio station in the Fm range.
-  * Adjust volume.
-  * Seek frequencies, both up and down.
-  * Display time and temperature.
-  * Adjust time
-  * Pre-set memory buttons to store 2 stations.
-  * Headphone jack out
+![Main image](img/main-image.png)
 
+## Features list
 
-## Structure
-The skeleton.cpp file holds all of the code that is run by the Arduino. It contains a setup() and loop() function.
+| Section     | Description                                                                                  | Achieved? |
+| ----------- | -------------------------------------------------------------------------------------------- | --------- |
+| General     | Power button to turn on/off device                                                           | ✓         |
+| General     | LED inside the case displays on/off state                                                    | ✓         |
+| Radio       | Outputs sound from a radio channel to aux                                                    | ✓         |
+| Radio       | Uses frequency change buttons to seek up and down from the set frequency                     | ✓         |
+| Radio       | Uses the memory buttons to Change to set frequency                                           | ✓         |
+| RTC         | Persistently stores date and time after power off                                            | ✓         |
+| RTC         | Uses the time change buttons to change the minute and hour                                   | ✓         |
+| RTC         | Automatically sets the time and date to a sane value on initial startup                      | ✓         |
+| Volume knob | Rotary encoder knob twists clockwise to increase volume and anticlockwise to decrease volume | ✓         |
+| Volume knob | Rotary encoder pushes in to toggle mute mode                                                 | ✓         |
+| LCD         | Displays the date and time by default                                                        | ✓         |
+| LCD         | Displays the temperature, to the left most part of the second row                            | ✓         |
+| LCD         | Displays the raw frequency on the second row                                                 | ✓         |
+| LCD         | Updates the raw frequency to the station name after 2 seconds if available                   | ✓         |
+| LCD         | Changes the entire display to a volume bar for 2 seconds after each volume change            | ✓         |
+| Case        | Made of 6 panels of acrylic plastic, 5 transparent and the bottom one tinted blue            | ✓         |
+| Case        | All but the top piece are held together with acrylic glue                                    | ✓         |
+| Case        | Components held in with strong adhesive, and not loose                                       | ✓         |
 
-The setup() function is what happens when the arduino is first turned on.
-From then on, whatever is within the loop() function will be executed recursively.
+## Usage guide
 
-displayVolume(), frequencyUpdate() and printTime() are functions we made to show the volume changing and time repectively.
-These are called within the loop function as the FM Radio defaults to showing the time and current frequency when the system is idle.
-Each time the frequency is being changed, we use the frequencyUpdate() function to show the frequency changing.
-When the volume rotary encoder is turned then we show the volume increasing and decreasing on the screen.
+![Project diagram](img/project-diagram.png)
 
-## Prerequisites
-Please find the following prerequisites inside the repo.
-  * AR1010lib.h & A1010lib.cpp
-  * LiquidCrystal_I2C.h & LiquidCrystal_I2C.cpp
-  * DS3231.h & DS3231.cpp
+Turning on: the time will be set to the default value. Use the time set buttons
+on the back of the device to set the correct time.
 
+Changing frequency: use the two preset memory buttons to change the frequency to
+EAGLE radio or BBC radio 4. Alternatively, use the two seek buttons to find the
+next available frequency in each direction.
 
+Changing volume: use the volume knob to change the volume. Pressing the knob in
+will toggle the mute state.
 
+Using the main display: look at the LCD for the  the date and time, current
+frequency (updates to the channel name if available), the temperature, and the
+volume when it is updated.
 
+## Assembly guide
 
+![Project diagram](img/project-diagram.png)
+
+Required hardware:
+
+-   AR1010
+-   16x2 liquid crystal display
+-   DS3231 RTC module
+-   Arduino nano
+-   Rotary encoder
+-   6 push buttons
+-   1 on/off toggle switch
+-   battery holder for 4 AA batteries
+
+Pin number layout:
+
+| Arduino pin number | Description     |
+| :----------------- | :-------------- |
+| D5                 | Memory button 1 |
+| D6                 | Memory button 2 |
+| D7                 | Frequency up    |
+| D8                 | Frequency down  |
+| D9                 | Change minute   |
+| D10                | Change hour     |
+
+Circuit diagram:
+
+![Circuit diagram](img/circuit-diagram.png)
+
+1.  Assemble the circuit shown above
+2.  Upload the code in this repository to the arduino
+3.  Create an approprate box and integrate the circuit
