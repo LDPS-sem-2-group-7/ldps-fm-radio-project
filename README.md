@@ -31,8 +31,6 @@
 
 ## Usage guide
 
-![Project diagram](img/project-diagram.png)
-
 Turning on: the time will be set to the default value. Use the time set buttons
 on the back of the device to set the correct time.
 
